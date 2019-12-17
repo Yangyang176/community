@@ -18,8 +18,8 @@
                 <span th:text="${question.title}"></span>
             </h3>
             <span class="text-desc">
-                作者：<span th:text="${question.user.name}"></span>|
-                阅读数：<span th:text="${question.viewCount}"></span>|
+                作者：<span th:text="${question.user.name}"></span> |
+                阅读数：<span th:text="${question.viewCount}"></span> |
                 发布时间：<span th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span>
             </span>
             <hr>
