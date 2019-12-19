@@ -1,0 +1,1 @@
+ALTER TABLE comment MODIFY like_count int NOT NULL DEFAULT '0' COMMENT '点赞数';
