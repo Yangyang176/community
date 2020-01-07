@@ -24,11 +24,32 @@ body{
 .profile .section{
     margin: 15px;
 }
+.question-tag{
+    margin-right: 5px;
+    margin-bottom: 5px;
+    white-space: normal;
+    display: inline-block;
+}
+.question-related{
+    list-style: none;
+    padding-left: 0;
+    font-size: 14px;
+    line-height: 25px;
+}
+.question-wechat{
+    width: 100%;
+}
+.publish-tag-tab{
+    display: none;
+    margin-top: 10px;
+}
+.publish-tags{
+    padding-top: 10px;
+}
 .community-menu{
     margin-bottom: 15px;
     font-size: 13px;
     color: #999;
-    display: block;
 }
 .comment{
     margin: 15px 0;
@@ -45,6 +66,16 @@ body{
     border-bottom: #eee 1px solid;
     padding-bottom: 10px;
 }
+.sub-comments{
+    border: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+.sub-comments .btn{
+    margin: 10px 0;
+}
 .comment-sp{
     margin-top: 0;
 }
@@ -57,6 +88,16 @@ body{
     margin-right: 5px;
     cursor: pointer;
 }
-.menu .icon:hover{
+.menu .comment-icon{
+    margin-right: 5px;
+    cursor: pointer;
+}
+.menu .active{
+    color: #428bca;
+}
+.menu .icon :hover{
+    color: #428bca;
+}
+.menu .comment-icon :hover{
     color: #428bca;
 }

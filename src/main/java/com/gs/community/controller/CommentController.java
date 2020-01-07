@@ -1,7 +1,9 @@
 package com.gs.community.controller;
 
 import com.gs.community.dto.CommentCreateDTO;
+import com.gs.community.dto.CommentDTO;
 import com.gs.community.dto.ResultDTO;
+import com.gs.community.enums.CommentTypeEnum;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.model.Comment;
 import com.gs.community.model.User;
@@ -9,12 +11,10 @@ import com.gs.community.service.CommentService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 public class CommentController {
@@ -38,8 +38,15 @@ public class CommentController {
         comment.setGmtCreate(System.currentTimeMillis());
         comment.setGmtModified(comment.getGmtCreate());
         comment.setLikeCount(0);
+        comment.setCommentCount(0);
         comment.setCommentator(user.getId());
-        commentService.insert(comment);
+        commentService.insert(comment,user);
         return ResultDTO.okOf();
+    }
+    @ResponseBody
+    @RequestMapping(value = "/comment/{id}",method = RequestMethod.GET)
+    public ResultDTO<List<CommentDTO>> comments(@PathVariable(name = "id") Integer id){
+        List<CommentDTO> commentDTOS = commentService.listByTargetId(id, CommentTypeEnum.COMMENT);
+        return ResultDTO.okOf(commentDTOS);
     }
 }

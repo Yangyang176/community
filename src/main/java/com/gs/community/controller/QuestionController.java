@@ -2,6 +2,7 @@ package com.gs.community.controller;
 
 import com.gs.community.dto.CommentDTO;
 import com.gs.community.dto.QuestionDTO;
+import com.gs.community.enums.CommentTypeEnum;
 import com.gs.community.service.CommentService;
 import com.gs.community.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,13 @@ public class QuestionController {
     public String question(@PathVariable(name = "id") Integer id,
                            Model model){
         QuestionDTO questionDTO = questionService.getById(id);
+        List<QuestionDTO> relatedQuestions = questionService.selectRelated(questionDTO);
+        List<CommentDTO> comments = commentService.listByTargetId(id, CommentTypeEnum.QUESTION);
         //增加浏览数
-        List<CommentDTO> comments = commentService.listByQuestionId(id);
         questionService.incView(id);
         model.addAttribute("question",questionDTO);
         model.addAttribute("comments",comments);
+        model.addAttribute("relatedQuestions",relatedQuestions);
         return "question";
     }
 }

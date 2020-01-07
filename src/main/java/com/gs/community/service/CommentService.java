@@ -2,12 +2,11 @@ package com.gs.community.service;
 
 import com.gs.community.dto.CommentDTO;
 import com.gs.community.enums.CommentTypeEnum;
+import com.gs.community.enums.NotificationStatusEnum;
+import com.gs.community.enums.NotificationTypeEnum;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
-import com.gs.community.mapper.CommentMapper;
-import com.gs.community.mapper.QuestionExtMapper;
-import com.gs.community.mapper.QuestionMapper;
-import com.gs.community.mapper.UserMapper;
+import com.gs.community.mapper.*;
 import com.gs.community.model.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +29,13 @@ public class CommentService {
     private QuestionExtMapper questionExtMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private CommentExtMapper commentExtMapper;
+    @Autowired
+    private NotificationMapper notificationMapper;
 
     @Transactional
-    public void insert(Comment comment) {
+    public void insert(Comment comment, User commentator) {
         if (comment.getParentId() == null || comment.getParentId() == 0) {
             throw new CustomizeException(CustomizeErrorCode.TARGET_PARAM_NOT_FOUND);
         }
@@ -41,26 +44,50 @@ public class CommentService {
         }
         if (comment.getType() == CommentTypeEnum.COMMENT.getType()) {
             //回复评论
-            Comment dbComment = commentMapper.selectByPrimaryKey(comment.getParentId());
-            if (dbComment == null) {
+            Comment parentComment = commentMapper.selectByPrimaryKey(comment.getParentId());
+            if (parentComment == null) {
                 throw new CustomizeException(CustomizeErrorCode.COMMENT_NOT_FOUND);
             }
-            commentMapper.insert(comment);
-        } else {
-            //回复问题
-            Question dbQuestion = questionMapper.selectByPrimaryKey(comment.getParentId());
-            if (dbQuestion == null) {
+            //查询所属问题
+            Question parentQuestion = questionMapper.selectByPrimaryKey(parentComment.getParentId());
+            if (parentQuestion == null) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
             commentMapper.insert(comment);
-            dbQuestion.setCommentCount(1);
-            questionExtMapper.incComment(dbQuestion);
+            parentComment.setCommentCount(1);
+            commentExtMapper.incComment(parentComment);
+            //创建通知
+            createNotify(comment, parentComment.getCommentator(), commentator.getName(), parentQuestion.getTitle(), NotificationTypeEnum.REPLY_COMMENT, parentQuestion.getId());
+        } else {
+            //回复问题
+            Question parentQuestion = questionMapper.selectByPrimaryKey(comment.getParentId());
+            if (parentQuestion == null) {
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
+            commentMapper.insert(comment);
+            parentQuestion.setCommentCount(1);
+            questionExtMapper.incComment(parentQuestion);
+            //创建通知
+            createNotify(comment, parentQuestion.getCreator(), commentator.getName(), parentQuestion.getTitle(), NotificationTypeEnum.REPLY_QUESTION, parentQuestion.getId());
         }
     }
 
-    public List<CommentDTO> listByQuestionId(Integer id) {
+    private void createNotify(Comment comment, Integer receiver, String notifierName, String outerTitle, NotificationTypeEnum notificationTypeEnum, Integer outerId) {
+        Notification notification = new Notification();
+        notification.setGmtCreate(System.currentTimeMillis());
+        notification.setType(notificationTypeEnum.getType());
+        notification.setNotifier(comment.getCommentator());
+        notification.setReceiver(receiver);
+        notification.setNotifierName(notifierName);
+        notification.setOuterId(outerId);
+        notification.setOuterTitle(outerTitle);
+        notification.setStatus(NotificationStatusEnum.UNREAD.getStatus());
+        notificationMapper.insert(notification);
+    }
+
+    public List<CommentDTO> listByTargetId(Integer id, CommentTypeEnum typeEnum) {
         CommentExample commentExample = new CommentExample();
-        commentExample.createCriteria().andParentIdEqualTo(id).andTypeEqualTo(CommentTypeEnum.QUESTION.getType());
+        commentExample.createCriteria().andParentIdEqualTo(id).andTypeEqualTo(typeEnum.getType());
         commentExample.setOrderByClause("gmt_create desc");
         List<Comment> comments = commentMapper.selectByExample(commentExample);
 
