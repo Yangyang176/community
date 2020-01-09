@@ -101,3 +101,7 @@ body{
 .menu .comment-icon :hover{
     color: #428bca;
 }
+.footer{
+    padding: 10px 25%;
+    color:#666;
+}

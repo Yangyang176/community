@@ -2,11 +2,11 @@ package com.gs.community.service;
 
 import com.gs.community.dto.PaginationDTO;
 import com.gs.community.dto.QuestionDTO;
+import com.gs.community.dto.QuestionQueryDTO;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
 import com.gs.community.mapper.QuestionExtMapper;
 import com.gs.community.mapper.QuestionMapper;
-
 import com.gs.community.mapper.UserMapper;
 import com.gs.community.model.Question;
 import com.gs.community.model.QuestionExample;
@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class QuestionService {
@@ -32,11 +30,17 @@ public class QuestionService {
     @Autowired
     private QuestionExtMapper questionExtMapper;
 
-    public PaginationDTO list(Integer page, Integer size) {
+    public PaginationDTO list(Integer page, Integer size, String search) {
+        if (StringUtils.isNotBlank(search)) {
+            search = search.replace(",", "|");
+        }
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;
-        QuestionExample example = new QuestionExample();
-        Integer totalCount = (int) questionMapper.countByExample(example);
+
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(search);
+
+        Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
         if (totalCount % size == 0) {
             totalPage = totalCount / size;
         } else {
@@ -53,9 +57,9 @@ public class QuestionService {
         if (offset < 0) {
             offset = 0;
         }
-        QuestionExample questionExample = new QuestionExample();
-        questionExample.setOrderByClause("gmt_create desc");
-        List<Question> questions = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
+        questionQueryDTO.setSize(size);
+        questionQueryDTO.setPage(offset);
+        List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);
         List<QuestionDTO> queryDTOList = new ArrayList<>();
         for (Question question : questions) {
             User user = userMapper.selectByPrimaryKey(question.getCreator());
@@ -73,6 +77,7 @@ public class QuestionService {
         Integer totalPage;
         QuestionExample example = new QuestionExample();
         example.createCriteria().andCreatorEqualTo(userId);
+        example.setOrderByClause("gmt_create desc");
         Integer totalCount = (int) questionMapper.countByExample(example);
         if (totalCount % size == 0) {
             totalPage = totalCount / size;
@@ -107,7 +112,7 @@ public class QuestionService {
 
     public QuestionDTO getById(Integer id) {
         Question question = questionMapper.selectByPrimaryKey(id);
-        if(question == null){
+        if (question == null) {
             throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
         }
         QuestionDTO queryDTO = new QuestionDTO();
@@ -118,7 +123,7 @@ public class QuestionService {
     }
 
     public void createOrUpdate(Question question) {
-        if (question.getId() == null){
+        if (question.getId() == null) {
             //插入
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
@@ -126,7 +131,7 @@ public class QuestionService {
             question.setLikeCount(0);
             question.setCommentCount(0);
             questionMapper.insert(question);
-        }else {
+        } else {
             //修改
             Question updateQuestion = questionMapper.selectByPrimaryKey(question.getId());
 //            Question updateQuestion = new Question();
@@ -137,7 +142,7 @@ public class QuestionService {
             QuestionExample example = new QuestionExample();
             example.createCriteria().andIdEqualTo(question.getId());
             int updated = questionMapper.updateByExampleSelective(updateQuestion, example);
-            if (updated != 1){
+            if (updated != 1) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
         }
@@ -151,7 +156,7 @@ public class QuestionService {
     }
 
     public List<QuestionDTO> selectRelated(QuestionDTO queryDTO) {
-        if (StringUtils.isBlank(queryDTO.getTag())){
+        if (StringUtils.isBlank(queryDTO.getTag())) {
             return new ArrayList<>();
         }
         String regexpTag = queryDTO.getTag().replace(",", "|");
@@ -161,7 +166,7 @@ public class QuestionService {
         List<Question> questions = questionExtMapper.selectRelated(question);
         List<QuestionDTO> questionDTOS = questions.stream().map(q -> {
             QuestionDTO questionDTO = new QuestionDTO();
-            BeanUtils.copyProperties(q,questionDTO);
+            BeanUtils.copyProperties(q, questionDTO);
             return questionDTO;
         }).collect(Collectors.toList());
         return questionDTOS;
