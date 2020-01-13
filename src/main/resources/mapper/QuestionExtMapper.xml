@@ -36,6 +36,9 @@
             <if test="search != null and search != ''">
                 and title regexp #{search}
             </if>
+            <if test="tag != null and tag != ''">
+                and tag regexp #{tag}
+            </if>
         </where>
     </select>
     <select id="selectBySearch" parameterType="com.gs.community.dto.QuestionQueryDTO" resultMap="BaseResultMap">
@@ -43,6 +46,9 @@
         <where>
             <if test="search != null and search != ''">
                 and title regexp #{search}
+            </if>
+            <if test="tag != null and tag != ''">
+                and tag regexp #{tag}
             </if>
         </where>
         order by gmt_create desc limit #{page},#{size}

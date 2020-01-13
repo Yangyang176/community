@@ -30,7 +30,7 @@ public class QuestionService {
     @Autowired
     private QuestionExtMapper questionExtMapper;
 
-    public PaginationDTO list(Integer page, Integer size, String search) {
+    public PaginationDTO list(Integer page, Integer size, String search, String tag) {
         if (StringUtils.isNotBlank(search)) {
             search = search.replace(",", "|");
         }
@@ -39,6 +39,7 @@ public class QuestionService {
 
         QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
         questionQueryDTO.setSearch(search);
+        questionQueryDTO.setTag(tag);
 
         Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
         if (totalCount % size == 0) {
@@ -77,7 +78,6 @@ public class QuestionService {
         Integer totalPage;
         QuestionExample example = new QuestionExample();
         example.createCriteria().andCreatorEqualTo(userId);
-        example.setOrderByClause("gmt_create desc");
         Integer totalCount = (int) questionMapper.countByExample(example);
         if (totalCount % size == 0) {
             totalPage = totalCount / size;
@@ -97,6 +97,7 @@ public class QuestionService {
         }
         QuestionExample questionExample = new QuestionExample();
         questionExample.createCriteria().andCreatorEqualTo(userId);
+        questionExample.setOrderByClause("gmt_create desc");
         List<Question> questions = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
         List<QuestionDTO> queryDTOList = new ArrayList<>();
         for (Question question : questions) {
