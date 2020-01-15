@@ -3,6 +3,7 @@ package com.gs.community.interceptor;
 import com.gs.community.mapper.UserMapper;
 import com.gs.community.model.User;
 import com.gs.community.model.UserExample;
+import com.gs.community.service.NavService;
 import com.gs.community.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ public class SessionIntercepor implements HandlerInterceptor {
     private UserMapper userMapper;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private NavService navService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -37,6 +40,7 @@ public class SessionIntercepor implements HandlerInterceptor {
                         session.setAttribute("user", users.get(0));
                         Integer unreadCount = notificationService.unreadCount(users.get(0).getId());
                         session.setAttribute("unreadCount", unreadCount);
+                        session.setAttribute("navs",navService.list());
                     }
                     break;
                 }

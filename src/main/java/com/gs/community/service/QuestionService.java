@@ -3,6 +3,7 @@ package com.gs.community.service;
 import com.gs.community.dto.PaginationDTO;
 import com.gs.community.dto.QuestionDTO;
 import com.gs.community.dto.QuestionQueryDTO;
+import com.gs.community.enums.SortEnum;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
 import com.gs.community.mapper.QuestionExtMapper;
@@ -30,7 +31,7 @@ public class QuestionService {
     @Autowired
     private QuestionExtMapper questionExtMapper;
 
-    public PaginationDTO list(Integer page, Integer size, String search, String tag) {
+    public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort) {
         if (StringUtils.isNotBlank(search)) {
             search = search.replace(",", "|");
         }
@@ -40,6 +41,19 @@ public class QuestionService {
         QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
         questionQueryDTO.setSearch(search);
         questionQueryDTO.setTag(tag);
+
+        for (SortEnum sortEnum : SortEnum.values()) {
+            if (sortEnum.name().toLowerCase().equals(sort)) {
+                questionQueryDTO.setSort(sort);
+                if (sortEnum == SortEnum.HOT7) {
+                    questionQueryDTO.setTime(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 7);
+                }
+                if (sortEnum == SortEnum.HOT30) {
+                    questionQueryDTO.setTime(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
+                }
+                break;
+            }
+        }
 
         Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
         if (totalCount % size == 0) {

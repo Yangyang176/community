@@ -62,10 +62,9 @@
                             <div role="tabpanel" th:id="${selectTagDTO.categoryName}"
                                  th:each="selectTagDTO,selectTagDTOStat : ${tagDTOs}"
                                  th:class="${selectTagDTOStat.first ? 'active tab-pane' : 'tab-pane'}">
-                                <span class="label label-info question-tag" th:each="selectTag : ${selectTagDTO.tags}">
-                                    <span class="glyphicon glyphicon-tags"></span>
-                                    <span onclick="selectTag(this)" th:data-tag="${selectTag}"
-                                          th:text="${selectTag}"></span>
+                                <span th:each="selectTag : ${selectTagDTO.tags}">
+                                    <span class="community-tag" onclick="selectTag(this)" th:data-tag="${selectTag}"
+                                          th:text="${''+selectTag}"></span>
                                 </span>
                             </div>
                         </div>
