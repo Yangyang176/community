@@ -1,8 +1,10 @@
 package com.gs.community.interceptor;
 
+import com.gs.community.enums.AdPosEnum;
 import com.gs.community.mapper.UserMapper;
 import com.gs.community.model.User;
 import com.gs.community.model.UserExample;
+import com.gs.community.service.AdService;
 import com.gs.community.service.NavService;
 import com.gs.community.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,15 @@ public class SessionIntercepor implements HandlerInterceptor {
     private NotificationService notificationService;
     @Autowired
     private NavService navService;
+    @Autowired
+    private AdService adService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+//        设置context级别的属性
+        for (AdPosEnum adPos : AdPosEnum.values()) {
+            request.getServletContext().setAttribute(adPos.name(), adService.list(adPos.name()));
+        }
         Cookie[] cookies = request.getCookies();
         if (cookies != null && cookies.length != 0) {
             for (Cookie cookie : cookies) {
@@ -40,7 +48,6 @@ public class SessionIntercepor implements HandlerInterceptor {
                         session.setAttribute("user", users.get(0));
                         Integer unreadCount = notificationService.unreadCount(users.get(0).getId());
                         session.setAttribute("unreadCount", unreadCount);
-                        session.setAttribute("navs",navService.list());
                     }
                     break;
                 }

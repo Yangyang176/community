@@ -11,7 +11,7 @@
 </head>
 <script type="application/javascript">
     var closable = window.localStorage.getItem("closable");
-    if (closable == "true"){
+    if (closable == "true") {
         window.close();
         window.localStorage.removeItem("closable");
     }
@@ -65,7 +65,8 @@
                         </a>
                     </li>
                     <li th:if="${pagination.showPrevious}">
-                        <a th:href="@{/(page=${pagination.page - 1},search=${search},tag=${tag},sort=${sort})}" aria-label="Previous">
+                        <a th:href="@{/(page=${pagination.page - 1},search=${search},tag=${tag},sort=${sort})}"
+                           aria-label="Previous">
                             <span aria-hidden="true">&lt;</span>
                         </a>
                     </li>
@@ -73,12 +74,14 @@
                         <a th:href="@{/(page=${page},search=${search},tag=${tag},sort=${sort})}" th:text="${page}"></a>
                     </li>
                     <li th:if="${pagination.showNext}">
-                        <a th:href="@{/(page=${pagination.page + 1},search=${search},tag=${tag},sort=${sort})}" aria-label="Next">
+                        <a th:href="@{/(page=${pagination.page + 1},search=${search},tag=${tag},sort=${sort})}"
+                           aria-label="Next">
                             <span aria-hidden="true">&gt;</span>
                         </a>
                     </li>
                     <li th:if="${pagination.showLastPage}">
-                        <a th:href="@{/(page=${pagination.totalPage},search=${search},tag=${tag},sort=${sort})}" aria-label="LastPage">
+                        <a th:href="@{/(page=${pagination.totalPage},search=${search},tag=${tag},sort=${sort})}"
+                           aria-label="LastPage">
                             <span aria-hidden="true">&gt;&gt;</span>
                         </a>
                     </li>
@@ -86,17 +89,15 @@
             </nav>
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
-            <!--联系站长-->
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <h3>联系站长</h3>
-                <img src="/images/wechat.png" class="img-thumbnail question-wechat">
-            </div>
+            <div th:insert="~{notice :: notice}"></div>
             <!--热门标签-->
             <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h5>热门标签</h5>
-                <a th:each="hotTag : ${hotTags}" th:href="@{/(page=1,search=${search},tag=${hotTag},sort=${sort})}" th:text="${hotTag}" class="community-tag"></a>
+                <a th:each="hotTag : ${hotTags}" th:href="@{/(page=1,search=${search},tag=${hotTag},sort=${sort})}"
+                   th:text="${hotTag}" class="community-tag"></a>
             </div>
+            <div th:insert="~{side :: side}"></div>
         </div>
     </div>
 </div>

@@ -33,14 +33,20 @@ public class QuestionService {
 
     public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort) {
         if (StringUtils.isNotBlank(search)) {
-            search = search.replace(",", "|");
+            search = search.replace(",", "|").replace("+","")
+                    .replace("*","").replace("&","").replace("?","");
         }
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;
 
         QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
         questionQueryDTO.setSearch(search);
-        questionQueryDTO.setTag(tag);
+
+        if (StringUtils.isNotBlank(tag)) {
+            tag = tag.replace("+", "").replace("*", "").replace("&","")
+                    .replace("?", "");
+            questionQueryDTO.setTag(tag);
+        }
 
         for (SortEnum sortEnum : SortEnum.values()) {
             if (sortEnum.name().toLowerCase().equals(sort)) {
@@ -174,7 +180,8 @@ public class QuestionService {
         if (StringUtils.isBlank(queryDTO.getTag())) {
             return new ArrayList<>();
         }
-        String regexpTag = queryDTO.getTag().replace(",", "|");
+        String regexpTag = queryDTO.getTag().replace(",", "|").replace("+","")
+                .replace("*","").replace("&","").replace("?","");
         Question question = new Question();
         question.setId(queryDTO.getId());
         question.setTag(regexpTag);
