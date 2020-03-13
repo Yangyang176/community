@@ -151,6 +151,10 @@ body {
     color: #428bca;
 }
 
+.menu .comment-icon .likecount {
+    margin-left: -8px;
+}
+
 .footer {
     text-align: center;
     padding: 0 0 15px 0;
