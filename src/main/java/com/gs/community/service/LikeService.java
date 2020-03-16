@@ -1,14 +1,12 @@
 package com.gs.community.service;
 
 import com.gs.community.enums.LikeTypeEnum;
+import com.gs.community.enums.NotificationStatusEnum;
+import com.gs.community.enums.NotificationTypeEnum;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
-import com.gs.community.mapper.CommentMapper;
-import com.gs.community.mapper.ThumbExtMapper;
-import com.gs.community.mapper.ThumbMapper;
-import com.gs.community.model.Comment;
-import com.gs.community.model.Thumb;
-import com.gs.community.model.ThumbExample;
+import com.gs.community.mapper.*;
+import com.gs.community.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +22,13 @@ public class LikeService {
     private CommentMapper commentMapper;
     @Autowired
     private ThumbExtMapper thumbExtMapper;
+    @Autowired
+    private QuestionMapper questionMapper;
+    @Autowired
+    private NotificationMapper notificationMapper;
 
     @Transactional
-    public int insert(Thumb thumb) {
+    public int insert(Thumb thumb, User user) {
         if (thumb.getTargetId() == null || thumb.getTargetId() == 0) {
             throw new CustomizeException(CustomizeErrorCode.TARGET_PARAM_NOT_FOUND);
         }
@@ -35,8 +37,8 @@ public class LikeService {
         }
         if (thumb.getType() == LikeTypeEnum.COMMENT.getType()) {
             // 点赞评论
-            Comment dbcomment = commentMapper.selectByPrimaryKey(thumb.getTargetId());
-            if (dbcomment == null) {
+            Comment dbComment = commentMapper.selectByPrimaryKey(thumb.getTargetId());
+            if (dbComment == null) {
                 throw new CustomizeException(CustomizeErrorCode.COMMENT_NOT_FOUND);
             }
             ThumbExample thumbExample = new ThumbExample();
@@ -48,13 +50,38 @@ public class LikeService {
                 return 2022;
             thumbMapper.insert(thumb);
 
+            //获取点赞的评论所属的问题
+            Question question = questionMapper.selectByPrimaryKey(dbComment.getParentId());
+            if (question == null){
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
+
             // 增加点赞数
-            dbcomment.setId(thumb.getTargetId());
-            dbcomment.setLikeCount(1);
-            thumbExtMapper.incLikeCount(dbcomment);
+            dbComment.setId(thumb.getTargetId());
+            dbComment.setLikeCount(1);
+            thumbExtMapper.incLikeCount(dbComment);
+
+            // 创建通知
+            createNotify(thumb,dbComment.getCommentator(),user.getName(),dbComment.getContent(),NotificationTypeEnum.LIKE_COMMENT,
+                    question.getId());
         } else {
-            // 增加点赞数
+            // 点赞问题
         }
         return 0;
+    }
+
+    private void createNotify(Thumb thumb, Integer receiver, String notifierName, String outerTitle, NotificationTypeEnum notificationType, Integer outerId) {
+        if (receiver == thumb.getLiker())
+            return;
+        Notification notification = new Notification();
+        notification.setGmtCreate(System.currentTimeMillis());
+        notification.setType(notificationType.getType());
+        notification.setOuterId(outerId);
+        notification.setNotifier(thumb.getLiker());
+        notification.setStatus(NotificationStatusEnum.UNREAD.getStatus());
+        notification.setReceiver(receiver);
+        notification.setNotifierName(notifierName);
+        notification.setOuterTitle(outerTitle);
+        notificationMapper.insert(notification);
     }
 }

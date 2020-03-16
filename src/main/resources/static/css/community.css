@@ -3,8 +3,12 @@ body {
 }
 
 .main {
-    margin: 30px;
+    margin: 0 auto;
     background-color: white;
+}
+
+.container-fluid{
+    max-width: 1200px;
 }
 
 .side {
@@ -86,6 +90,10 @@ body {
     margin-bottom: 15px;
     font-size: 13px;
     color: #999;
+}
+
+.community-menu img{
+    height: 13px;
 }
 
 .comment {

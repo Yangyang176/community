@@ -1,0 +1,1 @@
+ALTER TABLE question ALTER COLUMN status SET DEFAULT 0;

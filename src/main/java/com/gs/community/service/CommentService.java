@@ -53,6 +53,15 @@ public class CommentService {
             if (parentQuestion == null) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
+            //给问题设置最新回复时间
+            parentQuestion.setGmtLatestComment(System.currentTimeMillis());
+            QuestionExample example = new QuestionExample();
+            example.createCriteria().andIdEqualTo(parentQuestion.getId());
+            int update = questionMapper.updateByExampleSelective(parentQuestion, example);
+            if (update != 1){
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
+
             commentMapper.insert(comment);
             parentComment.setCommentCount(1);
             commentExtMapper.incComment(parentComment);
@@ -62,6 +71,14 @@ public class CommentService {
             //回复问题
             Question parentQuestion = questionMapper.selectByPrimaryKey(comment.getParentId());
             if (parentQuestion == null) {
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
+            //给问题设置最新回复时间
+            parentQuestion.setGmtLatestComment(System.currentTimeMillis());
+            QuestionExample example = new QuestionExample();
+            example.createCriteria().andIdEqualTo(parentQuestion.getId());
+            int update = questionMapper.updateByExampleSelective(parentQuestion, example);
+            if (update != 1){
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
             commentMapper.insert(comment);

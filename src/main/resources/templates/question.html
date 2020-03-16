@@ -20,7 +20,7 @@
 <div th:insert="~{navigation :: nav}"></div>
 <div class="container-fluid main profile">
     <div class="row">
-        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
             <!--正文-->
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h3>
@@ -70,6 +70,14 @@
                     <a th:href="@{'/publish/'+${question.id}}" class="community-menu"
                        th:if="${session.user != null && session.user.id == question.creator}">
                         <span class="glyphicon glyphicon-pencil" aria-hidden="true">编辑</span>
+                    </a>
+                    <a class="community-menu" th:href="@{'/publish/'+${question.id}}"
+                       th:if="${session.user!=null&&session.user.id == 1}">
+                        <img src="/images/jingtie.png" alt="精帖">精帖
+                    </a>
+                    <a class="community-menu" th:href="@{'/publish/'+${question.id}}"
+                       th:if="${session.user!=null&&session.user.id == 1}">
+                        <img src="/images/zhiding.png" alt="置顶">置顶
                     </a>
                 </div>
                 <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -146,7 +154,7 @@
             </div>
         </div>
         <!--右边信息栏-->
-        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <h5>发起人</h5>
                 <div class="media">

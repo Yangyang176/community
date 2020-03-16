@@ -1,6 +1,8 @@
 package com.gs.community.controller;
 
 import com.gs.community.dto.PaginationDTO;
+import com.gs.community.exception.CustomizeErrorCode;
+import com.gs.community.exception.CustomizeException;
 import com.gs.community.model.User;
 import com.gs.community.service.NotificationService;
 import com.gs.community.service.QuestionService;
@@ -27,7 +29,7 @@ public class ProfileController {
                           @RequestParam(name = "size", defaultValue = "10") Integer size) {
         User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
-            return "redirect:/";
+            throw new CustomizeException(CustomizeErrorCode.NO_LOGIN);
         }
         if ("questions".equals(action)) {
             model.addAttribute("section", "questions");
@@ -35,9 +37,9 @@ public class ProfileController {
             PaginationDTO pagination = questionService.listByUserId(user.getId(), page, size);
             model.addAttribute("pagination", pagination);
         }
-        if ("replies".equals(action)) {
-            model.addAttribute("section", "replies");
-            model.addAttribute("sectionName", "最新回复");
+        if ("notifies".equals(action)) {
+            model.addAttribute("section", "notifies");
+            model.addAttribute("sectionName", "最新通知");
             PaginationDTO pagination = notificationService.listByUserId(user.getId(), page, size);
             model.addAttribute("pagination", pagination);
         }

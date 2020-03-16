@@ -13,7 +13,7 @@
 <div th:insert="~{navigation :: nav}"></div>
 <div class="container-fluid main profile">
     <div class="row">
-        <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
             <h2>
                 <span th:text="${sectionName}"></span>
             </h2>
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" th:if="${section == 'replies'}">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" th:if="${section == 'notifies'}">
                 <div class="media" th:each="notification : ${pagination.data}">
                     <div class="media-body">
                         <p class="media-heading">
@@ -79,11 +79,11 @@
                 </nav>
             </div>
         </div>
-        <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
             <div class="list-group section">
                 <a href="/profile/questions" th:class="${section == 'questions'}?'list-group-item active':'list-group-item'">我的问题</a>
-                <a href="/profile/replies" th:class="${section == 'replies'}?'list-group-item active':'list-group-item'">
-                    最新回复
+                <a href="/profile/notifies" th:class="${section == 'notifies'}?'list-group-item active':'list-group-item'">
+                    最新通知
                     <span class="badge" th:text="${session.unreadCount}"></span>
                 </a>
             </div>
