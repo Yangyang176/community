@@ -41,7 +41,7 @@
                     </li>
                     <li><a href="/profile/notifies">通知 <span class="badge" th:text="${session.unreadCount}"></span></a></li>
                     <li th:if="${session.user}==null">
-                        <a href="https://github.com/login/oauth/authorize?client_id=79f540fc58ec56d4fd7d&redirect_uri=http://localhost:8887/callback&scope=user&state=1">登录</a>
+                        <a href="https://github.com/login/oauth/authorize?client_id=79f540fc58ec56d4fd7d&redirect_uri=http://localhost:8887/callback&scope=user&state=1" style="color: blue;">登录</a>
                     </li>
                     <li class="dropdown" th:if="${session.user}!=null">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"

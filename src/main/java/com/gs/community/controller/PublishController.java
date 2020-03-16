@@ -46,7 +46,8 @@ public class PublishController {
             @RequestParam("tag") String tag,
             HttpServletRequest request,
             Model model){
-
+        title = title.trim();
+        tag = tag.trim();
         model.addAttribute("title",title);
         model.addAttribute("description",description);
         model.addAttribute("tag",tag);
