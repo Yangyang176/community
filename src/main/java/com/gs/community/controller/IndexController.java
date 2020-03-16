@@ -2,6 +2,7 @@ package com.gs.community.controller;
 
 import com.gs.community.cache.HotTagCache;
 import com.gs.community.dto.PaginationDTO;
+import com.gs.community.dto.QuestionDTO;
 import com.gs.community.service.QuestionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class IndexController {
                         @RequestParam(name = "search", required = false) String search,
                         @RequestParam(name = "tag", required = false) String tag,
                         @RequestParam(name = "sort", required = false) String sort) {
+        List<QuestionDTO> topQuestions = questionService.listTop(search, tag, sort);
         PaginationDTO pagination = questionService.list(page, size, search, tag, sort);
         List<String> hotTags = hotTagCache.getHots();
         model.addAttribute("pagination", pagination);
@@ -33,6 +35,7 @@ public class IndexController {
         model.addAttribute("hotTags", hotTags);
         model.addAttribute("tag", tag);
         model.addAttribute("sort", sort);
+        model.addAttribute("topQuestions", topQuestions);
         return "index";
     }
 }

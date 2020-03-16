@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
+    <!--<script src="/js/click.js"></script>-->
     <link rel="stylesheet" href="/css/community.css">
 </head>
 <script type="application/javascript">
@@ -22,34 +23,12 @@
     <div class="row">
         <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
             <h3><span class="glyphicon glyphicon-th-list" aria-hidden="true"> 发现</span></h3>
-            <div class="media" th:each="question : ${pagination.data}" style="overflow: visible">
-                <div th:if="${question.status==2||question.status==3}">
-                    <div class="media-left">
-                        <a href="#">
-                            <img class="media-object img-rounded"
-                                 th:src="${question.user.avatarUrl}"
-                                 th:alt="${question.user.name}">
-                        </a>
-                    </div>
-                    <div class="media-body">
-                        <h4 class="media-heading">
-                            <span th:if="${question.status==2||question.status==3}"
-                                  class="label label-warning">置顶</span>
-                            <span th:if="${question.status==1||question.status==3}" class="label label-danger">精华</span>
-                            <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
-                        </h4>
-                        <!--<span th:text="${question.description}"></span><br>-->
-                        <span class="text-desc">
-                        • <span th:text="${question.commentCount}"></span>个评论
-                        • <span th:text="${question.viewCount}"></span>次浏览
-                        • <span th:text="${#dates.format(question.gmtLatestComment,'yyyy-MM-dd HH:mm')}"></span>
-                    </span>
-                    </div>
-                </div>
-            </div>
             <ul class="nav nav-tabs">
                 <li role="presentation" th:class="${sort == 'new' || sort == '' ? 'active':''}">
                     <a th:href="@{/(sort='new')}">最新</a>
+                </li>
+                <li role="presentation" th:class="${sort == 'good' ? 'active':''}">
+                    <a th:href="@{/(sort='good')}" class="red">精华帖</a>
                 </li>
                 <li role="presentation" th:class="${sort == 'hot30' ? 'active':''}">
                     <a th:href="@{/(sort='hot30')}">30天最热</a>
@@ -61,11 +40,11 @@
                     <a th:href="@{/(sort='hot')}">最热</a>
                 </li>
                 <li role="presentation" th:class="${sort == 'no' ? 'active':''}">
-                    <a th:href="@{/(sort='no')}" class="red">消灭零回复</a>
+                    <a th:href="@{/(sort='no')}">消灭零回复</a>
                 </li>
             </ul>
-            <div class="media" th:each="question : ${pagination.data}">
-                <div class="media-left">
+            <div class="media" th:each="question : ${topQuestions}" style="overflow: visible">
+                <div class="media-left avatar">
                     <a href="#">
                         <img class="media-object img-rounded"
                              th:src="${question.user.avatarUrl}"
@@ -84,6 +63,31 @@
                         • <span th:text="${question.viewCount}"></span>次浏览
                         • <span th:text="${#dates.format(question.gmtLatestComment,'yyyy-MM-dd HH:mm')}"></span>
                     </span>
+                </div>
+            </div>
+            <hr>
+            <div class="media" th:each="question : ${pagination.data}" style="overflow: visible">
+                <div th:if="${question.status==0||question.status==1}">
+                    <div class="media-left avatar">
+                        <a href="#">
+                            <img class="media-object img-rounded"
+                                 th:src="${question.user.avatarUrl}"
+                                 th:alt="${question.user.name}">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading">
+                            <span th:if="${question.status==2||question.status==3}"class="label label-warning">置顶</span>
+                            <span th:if="${question.status==1||question.status==3}" class="label label-danger">精华</span>
+                            <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
+                        </h4>
+                        <!--<span th:text="${question.description}"></span><br>-->
+                        <span class="text-desc">
+                        • <span th:text="${question.commentCount}"></span>个评论
+                        • <span th:text="${question.viewCount}"></span>次浏览
+                        • <span th:text="${#dates.format(question.gmtLatestComment,'yyyy-MM-dd HH:mm')}"></span>
+                    </span>
+                    </div>
                 </div>
             </div>
             <nav aria-label="Page navigation">

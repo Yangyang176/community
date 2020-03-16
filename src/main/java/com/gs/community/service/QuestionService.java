@@ -33,8 +33,8 @@ public class QuestionService {
 
     public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort) {
         if (StringUtils.isNotBlank(search)) {
-            search = search.replace(",", "|").replace("+","")
-                    .replace("*","").replace("&","").replace("?","");
+            search = search.replace(",", "|").replace("+", "")
+                    .replace("*", "").replace("&", "").replace("?", "");
         }
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;
@@ -43,7 +43,7 @@ public class QuestionService {
         questionQueryDTO.setSearch(search);
 
         if (StringUtils.isNotBlank(tag)) {
-            tag = tag.replace("+", "").replace("*", "").replace("&","")
+            tag = tag.replace("+", "").replace("*", "").replace("&", "")
                     .replace("?", "");
             questionQueryDTO.setTag(tag);
         }
@@ -182,8 +182,8 @@ public class QuestionService {
         if (StringUtils.isBlank(queryDTO.getTag())) {
             return new ArrayList<>();
         }
-        String regexpTag = queryDTO.getTag().replace(",", "|").replace("+","")
-                .replace("*","").replace("&","").replace("?","");
+        String regexpTag = queryDTO.getTag().replace(",", "|").replace("+", "")
+                .replace("*", "").replace("&", "").replace("?", "");
         Question question = new Question();
         question.setId(queryDTO.getId());
         question.setTag(regexpTag);
@@ -194,5 +194,45 @@ public class QuestionService {
             return questionDTO;
         }).collect(Collectors.toList());
         return questionDTOS;
+    }
+
+    public List<QuestionDTO> listTop(String search, String tag, String sort) {
+        if (StringUtils.isNotBlank(search)) {
+            search = search.replace(",", "|").replace("+", "")
+                    .replace("*", "").replace("&", "").replace("?", "");
+        }
+
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(search);
+
+        if (StringUtils.isNotBlank(tag)) {
+            tag = tag.replace("+", "").replace("*", "").replace("&", "")
+                    .replace("?", "");
+            questionQueryDTO.setTag(tag);
+        }
+
+        for (SortEnum sortEnum : SortEnum.values()) {
+            if (sortEnum.name().toLowerCase().equals(sort)) {
+                questionQueryDTO.setSort(sort);
+                if (sortEnum == SortEnum.HOT7) {
+                    questionQueryDTO.setTime(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 7);
+                }
+                if (sortEnum == SortEnum.HOT30) {
+                    questionQueryDTO.setTime(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
+                }
+                break;
+            }
+        }
+
+        List<Question> questions = questionExtMapper.selectTop(questionQueryDTO);
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+        for (Question question : questions) {
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            QuestionDTO queryDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question, queryDTO);
+            queryDTO.setUser(user);
+            questionDTOList.add(queryDTO);
+        }
+        return questionDTOList;
     }
 }
