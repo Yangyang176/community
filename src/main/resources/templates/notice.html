@@ -3,10 +3,32 @@
 <body>
 
 <div th:fragment="notice">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info" align="center">
+        <div class="panel-heading">
+            <h3 class="panel-title">欢迎光临</h3>
+        </div>
+        <div class="panel-body">
+            <p id="logInfo"></p>
+            <iframe scrolling="no" src="https://tianqiapi.com/api.php?style=tr&skin=cake" frameborder="0" width="100%" height="220" allowtransparency="true"></iframe>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info" align="center">
+        <div class="panel-heading">
+            <h3 class="panel-title">每日一图</h3>
+        </div>
+        <div class="panel-body">
+            <img src="https://api.lli.cx/bing/api.php" alt="bing" style="width: 100%"/>
+        </div>
+    </div>
     <!--联系站长-->
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <h3>联系站长</h3>
-        <img src="/images/connection.png" class="img-thumbnail question-wechat">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info" align="center">
+        <div class="panel-heading">
+            <h4>联系站长</h4>
+        </div>
+        <div class="panel-body">
+            <img src="/images/connection.png" class="img-thumbnail question-wechat">
+        </div>
     </div>
 </div>
 

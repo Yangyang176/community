@@ -5,8 +5,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/backToTop.css">
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
+    <script src="/js/backToTop.js"></script>
     <!--<script src="/js/click.js"></script>-->
     <link rel="stylesheet" href="/css/community.css">
 </head>
@@ -61,6 +63,7 @@
                     <span class="text-desc">
                         • <span th:text="${question.commentCount}"></span>个评论
                         • <span th:text="${question.viewCount}"></span>次浏览
+                        • <span th:text="${question.likeCount}"></span>人收藏
                         • <span th:text="${#dates.format(question.gmtLatestComment,'yyyy-MM-dd HH:mm')}"></span>
                     </span>
                 </div>
@@ -85,6 +88,7 @@
                         <span class="text-desc">
                         • <span th:text="${question.commentCount}"></span>个评论
                         • <span th:text="${question.viewCount}"></span>次浏览
+                        • <span th:text="${question.likeCount}"></span>人收藏
                         • <span th:text="${#dates.format(question.gmtLatestComment,'yyyy-MM-dd HH:mm')}"></span>
                     </span>
                     </div>
@@ -124,11 +128,14 @@
         <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
             <div th:insert="~{notice :: notice}"></div>
             <!--热门标签-->
-            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <h5>热门标签</h5>
-                <a th:each="hotTag : ${hotTags}" th:href="@{/(page=1,search=${search},tag=${hotTag},sort=${sort})}"
-                   th:text="${hotTag}" class="community-tag"></a>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info">
+                <div class="panel-heading" align="center">
+                    <h5 class="panel-title">热门标签</h5>
+                </div>
+                <div class="panel-body">
+                    <a th:each="hotTag : ${hotTags}" th:href="@{/(page=1,search=${search},tag=${hotTag},sort=${sort})}"
+                       th:text="${hotTag}" class="community-tag"></a>
+                </div>
             </div>
             <div th:insert="~{side :: side}"></div>
         </div>

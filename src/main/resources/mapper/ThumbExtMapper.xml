@@ -17,7 +17,13 @@
   <update id="incLikeCount" parameterType="com.gs.community.model.Comment">
     update comment
     set
-    LIKE_COUNT = LIKE_COUNT + #{likeCount,jdbcType=BIGINT}
+    LIKE_COUNT = LIKE_COUNT + #{likeCount,jdbcType=INTEGER}
+    where id = #{id}
+  </update>
+  <update id="incQuestionLikeCount" parameterType="com.gs.community.model.Question">
+    update question
+    set
+    LIKE_COUNT = LIKE_COUNT + #{likeCount,jdbcType=INTEGER}
     where id = #{id}
   </update>
 </mapper>

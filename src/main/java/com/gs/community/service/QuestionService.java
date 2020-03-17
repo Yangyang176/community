@@ -8,10 +8,9 @@ import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
 import com.gs.community.mapper.QuestionExtMapper;
 import com.gs.community.mapper.QuestionMapper;
+import com.gs.community.mapper.ThumbMapper;
 import com.gs.community.mapper.UserMapper;
-import com.gs.community.model.Question;
-import com.gs.community.model.QuestionExample;
-import com.gs.community.model.User;
+import com.gs.community.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +29,8 @@ public class QuestionService {
     private UserMapper userMapper;
     @Autowired
     private QuestionExtMapper questionExtMapper;
+    @Autowired
+    private ThumbMapper thumbMapper;
 
     public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort) {
         if (StringUtils.isNotBlank(search)) {
@@ -234,5 +235,49 @@ public class QuestionService {
             questionDTOList.add(queryDTO);
         }
         return questionDTOList;
+    }
+
+    public PaginationDTO listByThumbExample(Integer userId, Integer page, Integer size, String likes) {
+        Integer totalPage;
+        ThumbExample thumbExample = new ThumbExample();
+        thumbExample.createCriteria().andTypeEqualTo(1).andLikerEqualTo(userId);
+        int totalCount = (int) thumbMapper.countByExample(thumbExample);
+        if (totalCount % size == 0) {
+            totalPage = totalCount / size;
+        } else {
+            totalPage = totalCount / size + 1;
+        }
+
+        if (page > totalPage) {
+            page = totalPage;
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+
+        Integer offset = size * (page - 1);
+
+        thumbExample.setOrderByClause("gmt_modified desc");
+        List<Thumb> thumbs = thumbMapper.selectByExampleWithRowbounds(thumbExample, new RowBounds(offset, size));
+        List<Question> questionList = new ArrayList<>();
+        PaginationDTO paginationDTO = new PaginationDTO();
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+
+        for (Thumb thumb : thumbs) {
+            questionList.add(questionMapper.selectByPrimaryKey(thumb.getTargetId()));
+        }
+        for (Question question : questionList) {
+            User user = userMapper.selectByPrimaryKey(question.getCreator());
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(question, questionDTO);
+            questionDTO.setUser(user);
+            questionDTOList.add(questionDTO);
+        }
+
+        paginationDTO.setData(questionDTOList);
+        paginationDTO.setPagination(totalPage, page);
+        paginationDTO.setTotalCount(totalCount);
+        return paginationDTO;
     }
 }

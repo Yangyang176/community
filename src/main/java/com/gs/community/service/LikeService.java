@@ -52,7 +52,7 @@ public class LikeService {
 
             //获取点赞的评论所属的问题
             Question question = questionMapper.selectByPrimaryKey(dbComment.getParentId());
-            if (question == null){
+            if (question == null) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
 
@@ -62,10 +62,30 @@ public class LikeService {
             thumbExtMapper.incLikeCount(dbComment);
 
             // 创建通知
-            createNotify(thumb,dbComment.getCommentator(),user.getName(),dbComment.getContent(),NotificationTypeEnum.LIKE_COMMENT,
+            createNotify(thumb, dbComment.getCommentator(), user.getName(), dbComment.getContent(), NotificationTypeEnum.LIKE_COMMENT,
                     question.getId());
-        } else {
-            // 点赞问题
+        } else if (thumb.getType() == LikeTypeEnum.QUESTION.getType()) {
+            // 收藏问题
+            Question dbQuestion = questionMapper.selectByPrimaryKey(thumb.getTargetId());
+            if (dbQuestion == null) {
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
+            ThumbExample thumbExample = new ThumbExample();
+            thumbExample.createCriteria().andTargetIdEqualTo(thumb.getTargetId())
+                    .andTypeEqualTo(thumb.getType()).andLikerEqualTo(thumb.getLiker());
+            List<Thumb> thumbs = thumbMapper.selectByExample(thumbExample);
+            if (thumbs.size() >= 1)
+                return 2023;
+            thumbMapper.insert(thumb);
+
+            //增加问题收藏数
+            dbQuestion.setId(thumb.getTargetId());
+            dbQuestion.setLikeCount(1);
+            thumbExtMapper.incQuestionLikeCount(dbQuestion);
+
+            //创建通知
+            createNotify(thumb, dbQuestion.getCreator(), user.getName(), dbQuestion.getTitle(), NotificationTypeEnum.LIKE_QUESTION,
+                    dbQuestion.getId());
         }
         return 0;
     }

@@ -10,17 +10,21 @@ function comment(e) {
     var content = $("#input-" + commentId).val();
     commentTarget(commentId,2,content);
 }
-/*点赞*/
+/*点赞评论*/
 function like_comment(e) {
     var commentId = e.getAttribute("data-id");
     like2target(commentId, 2);
 }
-
-
+/*收藏问题*/
+function like_question(e) {
+    var questionId = e.getAttribute("data-id");
+    //alert(questionId);
+    like2target(questionId, 1);
+}
 function like2target(targetId, type){
     $.ajax({
         type: "POST",
-        url: "/like/comment",
+        url: "/like",
         contentType: 'application/json',
         data: JSON.stringify({
             "targetId": targetId,
@@ -29,8 +33,8 @@ function like2target(targetId, type){
         success: function (response) {
             if (response.code == 200) {//点赞成功
                 swal({
-                    title: "成功!",
-                    text: "成功点赞，感谢您的支持!",
+                    title: ""+response.message,
+                    text: "感谢您的支持，作者会收到您的通知!",
                     icon: "success",
                     button: "确认",
                 });
@@ -39,6 +43,13 @@ function like2target(targetId, type){
                     thumbicon.addClass("new");
                     var likecount = $("#likecount-" + targetId);
                     likecount.html(parseInt(likecount.text())+1);//点赞+1
+                }
+                if(type==1){//收藏问题时
+                    var thumbicon = $("questionlikespan-" + targetId);
+                    thumbicon.removeClass("glyphicon-heart-empty");
+                    thumbicon.addClass("glyphicon-heart");
+                    var likecount = $("#questionlikecount-" + targetId);
+                    likecount.html(parseInt(likecount.text())+1);//收藏+1
                 }
             } else {
                 if (response.code == 2003) {
@@ -98,6 +109,17 @@ function like2target(targetId, type){
                     swal({
                         title: "点赞失败!",
                         text: "请不要重复点赞哦!",
+                        icon: "error",
+                        button: "确认",
+                    });
+                }
+                if (response.code == 2023) {
+                    var thumbicon = $("#questionlikespan-" + targetId);
+                    thumbicon.removeClass("glyphicon-heart-empty");
+                    thumbicon.addClass("glyphicon-heart");
+                    swal({
+                        title: "收藏失败!",
+                        text: "请不要重复收藏哦!",
                         icon: "error",
                         button: "确认",
                     });

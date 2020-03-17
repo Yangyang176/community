@@ -31,6 +31,15 @@
                 阅读数：<span th:text="${question.viewCount}"></span> |
                 发布时间：<span th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span>
                 </span>
+                <div style="text-align: left">
+                    <button class="btn btn-warning" th:data-id="${question.id}" onclick="like_question(this)">
+                        <span th:id="${'questionlikespan-'+question.id}" class="glyphicon glyphicon-star-empty">
+                            收藏
+                            <span th:id="${'questionlikecount-'+question.id}" class="badge" style="margin-left: -5px"
+                                  th:text="${question.likeCount}"></span>
+                        </span>
+                    </button>
+                </div>
                 <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 top-header"
                      th:if="${!#lists.isEmpty(#httpServletRequest.getServletContext().getAttribute('HEADER'))}"
@@ -91,7 +100,8 @@
                 <div class="media comments" th:each="comment : ${comments}">
                     <div class="media-left avatar">
                         <a href="#">
-                            <img class="media-object img-rounded" th:src="${comment.user.avatarUrl}">
+                            <img class="media-object img-rounded" th:src="${comment.user.avatarUrl}"
+                                 th:alt="${comment.user.name}">
                         </a>
                     </div>
                     <div class="media-body">
@@ -160,7 +170,8 @@
                 <div class="media">
                     <div class="media-left avatar">
                         <a href="#">
-                            <img class="media-object img-rounded" th:src="${question.user.avatarUrl}">
+                            <img class="media-object img-rounded" th:src="${question.user.avatarUrl}"
+                                 th:alt="${question.user.name}">
                         </a>
                     </div>
                     <div class="media-body">

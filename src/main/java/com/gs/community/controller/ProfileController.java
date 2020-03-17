@@ -21,6 +21,7 @@ public class ProfileController {
     private QuestionService questionService;
     @Autowired
     private NotificationService notificationService;
+
     @GetMapping("/profile/{action}")
     public String profile(HttpServletRequest request,
                           @PathVariable(name = "action") String action,
@@ -42,6 +43,12 @@ public class ProfileController {
             model.addAttribute("sectionName", "最新通知");
             PaginationDTO pagination = notificationService.listByUserId(user.getId(), page, size);
             model.addAttribute("pagination", pagination);
+        }
+        if ("likes".equals(action)) {
+            PaginationDTO paginationDTO = questionService.listByThumbExample(user.getId(), page, size, "likes");
+            model.addAttribute("section", "likes");
+            model.addAttribute("sectionName", "我的收藏");
+            model.addAttribute("pagination", paginationDTO);
         }
         return "profile";
     }
