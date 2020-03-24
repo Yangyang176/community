@@ -5,7 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/editormd.min.css">
     <link rel="stylesheet" href="/css/editormd.preview.min.css"/>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
     <script src="/js/moment.js" type="application/javascript"></script>
@@ -55,7 +57,7 @@
                 </div>
                 <script type="text/javascript">
                     $(function () {
-                        editormd.markdownToHTML("question-view", {});
+                        editormd.markdownToHTML("question-view", {emoji: true});
                     });
                 </script>
                 <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -78,7 +80,7 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <a th:href="@{'/publish/'+${question.id}}" class="community-menu"
                        th:if="${session.user != null && session.user.id == question.creator}">
-                        <span class="glyphicon glyphicon-pencil" aria-hidden="true">编辑</span>
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true">编辑</span>
                     </a>
                     <a class="community-menu" th:href="@{'/publish/'+${question.id}}"
                        th:if="${session.user!=null&&session.user.id == 1}">
@@ -109,6 +111,14 @@
                             <span th:text="${comment.user.name}"></span>
                         </h6>
                         <div th:text="${comment.content}"></div>
+                        <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="comment-view">-->
+                            <!--<textarea style="display:none;" th:text="${comment.content}"></textarea>-->
+                        <!--</div>-->
+                        <!--<script type="text/javascript">-->
+                            <!--$(function () {-->
+                                <!--editormd.markdownToHTML("comment-view", {emoji: true});-->
+                            <!--});-->
+                        <!--</script>-->
                         <div class="menu">
                             <span class="comment-icon" th:id="${'thumbicon-'+comment.id}">
                                 <span class="glyphicon glyphicon-thumbs-up icon" th:data-id="${comment.id}"
@@ -160,14 +170,36 @@
                 </div>
                 <input type="hidden" id="question_id" th:value="${question.id}">
                 <textarea class="form-control comment" id="comment_content" rows="6"></textarea>
+                <!--<div class="form-group" id="comment-editor">-->
+                    <!--<textarea name="comment_content" id="comment_content" style="display:none;"-->
+                              <!--class="form-control comment"  rows="6"></textarea>-->
+                    <!--<script type="text/javascript">-->
+                        <!--$(function () {-->
+                            <!--editormd("comment-editor", {-->
+                                <!--width: "100%",-->
+                                <!--height: "210px",-->
+                                <!--path: "/js/lib/",-->
+                                <!--delay: 0,-->
+                                <!--watch: false,-->
+                                <!--placeholder: "请输入评论描述...",-->
+                                <!--imageUpload: true,-->
+                                <!--imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],-->
+                                <!--imageUploadURL: "/file/upload",-->
+                                <!--emoji: true-->
+                            <!--});-->
+                        <!--});-->
+                    <!--</script>-->
+                <!--</div>-->
                 <button type="button" class="btn btn-success btn-comment" onclick="post()">评论</button>
             </div>
         </div>
         <!--右边信息栏-->
         <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <h5>发起人</h5>
-                <div class="media">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info">
+                <div class="panel-heading" align="center">
+                    <h5 class="panel-title">发起人</h5>
+                </div>
+                <div class="media panel-body">
                     <div class="media-left avatar">
                         <a href="#">
                             <img class="media-object img-rounded" th:src="${question.user.avatarUrl}"
@@ -183,14 +215,17 @@
             </div>
             <div th:insert="~{notice :: notice}"></div>
             <!--相关问题-->
-            <hr class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <h5>相关问题</h5>
-                <ul class="question-related">
-                    <li th:each="related : ${relatedQuestions}">
-                        <a th:href="@{'/question/'+${related.id}}" th:text="${related.title}"></a>
-                    </li>
-                </ul>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info">
+                <div class="panel-heading" align="center">
+                    <h5>相关问题</h5>
+                </div>
+                <div class="panel-body">
+                    <ul class="question-related">
+                        <li th:each="related : ${relatedQuestions}">
+                            <a th:href="@{'/question/'+${related.id}}" th:text="${related.title}"></a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div th:insert="~{side :: side}"></div>
         </div>

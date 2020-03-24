@@ -34,4 +34,10 @@ public class ResultDTO<T> {
         resultDTO.setData(data);
         return resultDTO;
     }
+    public static ResultDTO okOf(String message) {
+        ResultDTO resultDTO = new ResultDTO();
+        resultDTO.setCode(200);
+        resultDTO.setMessage(message);
+        return resultDTO;
+    }
 }

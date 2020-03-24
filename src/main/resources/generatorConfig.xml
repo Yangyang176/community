@@ -38,6 +38,7 @@
         <table tableName="nav" domainObjectName="Nav" ></table>
         <table tableName="ad" domainObjectName="Ad" ></table>
         <table tableName="thumb" domainObjectName="Thumb" ></table>
+        <table tableName="user_info" domainObjectName="UserInfo" ></table>
 
     </context>
 </generatorConfiguration>
