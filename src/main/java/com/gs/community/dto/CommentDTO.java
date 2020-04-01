@@ -1,6 +1,7 @@
 package com.gs.community.dto;
 
 import com.gs.community.model.User;
+import com.gs.community.model.UserAccount;
 import lombok.Data;
 
 @Data
@@ -15,4 +16,5 @@ public class CommentDTO {
     private String content;
     private User user;
     private Integer commentCount;
+    private UserAccount userAccount;
 }

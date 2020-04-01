@@ -2,12 +2,10 @@ package com.gs.community.service;
 
 import com.gs.community.dto.ResultDTO;
 import com.gs.community.exception.CustomizeErrorCode;
+import com.gs.community.mapper.UserAccountMapper;
 import com.gs.community.mapper.UserInfoMapper;
 import com.gs.community.mapper.UserMapper;
-import com.gs.community.model.User;
-import com.gs.community.model.UserExample;
-import com.gs.community.model.UserInfo;
-import com.gs.community.model.UserInfoExample;
+import com.gs.community.model.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,8 @@ public class UserService {
     private UserMapper userMapper;
     @Autowired
     private UserInfoMapper userInfoMapper;
+    @Autowired
+    private UserAccountMapper userAccountMapper;
 
     public void createOrUpdate(User user) {
         UserExample userExample = new UserExample();
@@ -33,15 +33,23 @@ public class UserService {
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
             userMapper.insert(user);
+            UserExample userExample2 = new UserExample();
+            userExample2.createCriteria()
+                    .andAccountIdEqualTo(user.getAccountId());
+            List<User> users2 = userMapper.selectByExample(userExample2);
+            if (users2.size() != 0) {//表示user已在表中创建
+                User dbUser = users2.get(0);
+                initUserTable(dbUser, new UserInfo());
+            }
         } else {
             //修改
             User dbUser = users.get(0);
             User updateUser = new User();
             if (dbUser.getName() == null && user.getName() == null)
                 updateUser.setName(getUserName("Github"));
-            if (user.getName() != null)
-                updateUser.setName(user.getName());
-            updateUser.setAvatarUrl(user.getAvatarUrl());
+            /*if (user.getName() != null)
+                updateUser.setName(user.getName());*/
+//            updateUser.setAvatarUrl(user.getAvatarUrl());
             updateUser.setToken(user.getToken());
             updateUser.setGmtModified(System.currentTimeMillis());
             UserExample example = new UserExample();
@@ -106,18 +114,18 @@ public class UserService {
             updateUser.setGmtCreate(System.currentTimeMillis());
             updateUser.setGmtModified(updateUser.getGmtCreate());
             userMapper.insert(updateUser);
-//            UserExample example = new UserExample();
-//            example.createCriteria()
-//                    .andEmailEqualTo(mail);
-//            List<User> insertUsers = userMapper.selectByExample(example);
-//            User insertUser = insertUsers.get(0);
-//            initUserTable(insertUser,new UserInfo());
+            UserExample example = new UserExample();
+            example.createCriteria()
+                    .andEmailEqualTo(mail);
+            List<User> insertUsers = userMapper.selectByExample(example);
+            User insertUser = insertUsers.get(0);
+            initUserTable(insertUser, new UserInfo());
             return ResultDTO.okOf(token);
         }
 
     }
 
-    public int createOrUpdateBaidu(User user, User loginuser, UserInfo userInfo) {
+    public int createOrUpdateBaidu(User user, User loginUser, UserInfo userInfo) {
         UserExample userExample = new UserExample();
         userExample.createCriteria()
                 .andBaiduAccountIdEqualTo(user.getBaiduAccountId());
@@ -129,7 +137,7 @@ public class UserService {
             user.setGmtModified(user.getGmtCreate());
             if (user.getName() == null || StringUtils.isBlank(user.getName()))
                 user.setName(getUserName("Baidu"));
-            if (loginuser == null) {//创建
+            if (loginUser == null) {//创建
                 userMapper.insert(user);
                 UserExample userExample2 = new UserExample();
                 userExample2.createCriteria()
@@ -145,9 +153,9 @@ public class UserService {
                 //  userMapper.insert(user);
 
             }
-            if (loginuser != null) {//绑定或者换绑
+            if (loginUser != null) {//绑定或者换绑
                 updateUser.setBaiduAccountId(user.getBaiduAccountId());
-                updateUserInfo(user, updateUser, loginuser, userInfo);
+                updateUserInfo(user, updateUser, loginUser, userInfo);
                 return 2;
             }
 
@@ -172,36 +180,67 @@ public class UserService {
         // UserInfo userInfo = new UserInfo();
         userInfo.setUserId(user.getId());
         userInfoMapper.insert(userInfo);
-        /*UserAccount userAccount = new UserAccount();
+        UserAccount userAccount = new UserAccount();
         userAccount = initUserAccount(userAccount);
         userAccount.setUserId(user.getId());
-        userAccountMapper.insert(userAccount);*/
+        userAccountMapper.insert(userAccount);
         userInfo = null;
-//        userAccount=null;
+        userAccount = null;
     }
 
-    public void updateUserInfo(User user, User updateUser, User loginuser, UserInfo userInfo) {
+    public UserAccount initUserAccount(UserAccount userAccount) {
+        userAccount.setGroupId(1);
+        userAccount.setVipRank(0);
+        userAccount.setScore(0);
+        userAccount.setScore1(0);
+        userAccount.setScore2(0);
+        userAccount.setScore3(0);
+        return userAccount;
+    }
+
+    public void updateUserInfo(User user, User updateUser, User loginUser, UserInfo userInfo) {
         updateUser.setGmtModified(System.currentTimeMillis());
         updateUser.setToken(user.getToken());
         //updateUser.setAvatarUrl(user.getAvatarUrl());
         UserExample example = new UserExample();
         example.createCriteria()
-                .andIdEqualTo(loginuser.getId());
+                .andIdEqualTo(loginUser.getId());
         userMapper.updateByExampleSelective(updateUser, example);
 
         UserInfoExample userInfoExample = new UserInfoExample();
         userInfoExample.createCriteria()
-                .andUserIdEqualTo(loginuser.getId());
+                .andUserIdEqualTo(loginUser.getId());
         List<UserInfo> dbUserInfos = userInfoMapper.selectByExample(userInfoExample);
         if (dbUserInfos.size() == 0) {//信息为空插入
-            userInfo.setUserId(loginuser.getId());
+            userInfo.setUserId(loginUser.getId());
             userInfoMapper.insert(userInfo);
         } else {//信息不空更新
             UserInfoExample userInfEexample = new UserInfoExample();
             userInfEexample.createCriteria()
-                    .andUserIdEqualTo(loginuser.getId());
+                    .andUserIdEqualTo(loginUser.getId());
             userInfoMapper.updateByExampleSelective(userInfo, userInfEexample);
         }
 
+    }
+
+    public int updateAvatarById(Integer userId, String avatar) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        user.setAvatarUrl(avatar);
+        return userMapper.updateByPrimaryKey(user);
+    }
+
+    public int updateUsernameById(Integer userId, String username) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (username.equals(user.getName()))
+            return 1;
+        else
+            user.setName(username);
+        return userMapper.updateByPrimaryKey(user);
+    }
+
+    public User selectUserByUserId(String userId) {
+        Integer id = Integer.parseInt(userId);
+        User user = userMapper.selectByPrimaryKey(id);
+        return user;
     }
 }

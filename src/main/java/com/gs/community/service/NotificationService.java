@@ -55,6 +55,7 @@ public class NotificationService {
             notificationDTO.setTypeName(NotificationTypeEnum.nameOfType(notification.getType()));
             notificationDTOS.add(notificationDTO);
         }
+        paginationDTO.setTotalCount(totalCount);
         paginationDTO.setData(notificationDTOS);
         return paginationDTO;
     }
@@ -79,5 +80,23 @@ public class NotificationService {
         BeanUtils.copyProperties(notification, notificationDTO);
         notificationDTO.setTypeName(NotificationTypeEnum.nameOfType(notification.getType()));
         return notificationDTO;
+    }
+
+    public int readAllByUserId(Integer userId) {
+        NotificationExample notificationExample = new NotificationExample();
+        notificationExample.createCriteria().andReceiverEqualTo(userId).andStatusEqualTo(0);
+        Notification notification = new Notification();
+        notification.setStatus(1);
+        return notificationMapper.updateByExampleSelective(notification, notificationExample);
+    }
+
+    public int removeAllByUserId(Integer userId) {
+        NotificationExample notificationExample = new NotificationExample();
+        notificationExample.createCriteria().andReceiverEqualTo(userId);
+        return notificationMapper.deleteByExample(notificationExample);
+    }
+
+    public int removeById(Integer id) {
+        return notificationMapper.deleteByPrimaryKey(id);
     }
 }

@@ -409,11 +409,11 @@ layui.define(['laypage', 'fly', 'element', 'flow'], function(exports){
   };
 
   //移除收藏
-  $('.NT-remove-like-p').on('click', function(){
+  $('.SS-remove-like-question').on('click', function(){
     var othis = $(this).parents('li'), id = othis.data('id');
     console.log("id"+id);
     layer.confirm('确定取消收藏吗？', function(index){
-      $.post('/user/p/like/remove/id', {
+      $.post('/user/question/like/remove/id', {
         id: id,
         type:1
       }, function(res){

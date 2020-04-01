@@ -3,14 +3,17 @@
 <head>
     <title>山商论坛</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/layui/css/layui.css">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/mylay.css">
     <link rel="stylesheet" href="/css/backToTop.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
+    <script src="/layui/layui.js" type="application/javascript"></script>
     <script src="/js/backToTop.js"></script>
-    <!--<script src="/js/click.js"></script>-->
     <link rel="stylesheet" href="/css/community.css">
 </head>
 <script type="application/javascript">
@@ -48,7 +51,7 @@
             </ul>
             <div class="media" th:each="question : ${topQuestions}" style="overflow: visible">
                 <div class="media-left avatar">
-                    <a href="#">
+                    <a th:href="${'/user/'+question.user.id}">
                         <img class="media-object img-rounded"
                              th:src="${question.user.avatarUrl}"
                              th:alt="${question.user.name}">
@@ -56,11 +59,26 @@
                 </div>
                 <div class="media-body">
                     <h4 class="media-heading">
-                        <span th:if="${question.status==2||question.status==3}" class="label label-warning">置顶</span>
-                        <span th:if="${question.status==1||question.status==3}" class="label label-danger">精华</span>
+                        <a class="layui-badge layui-bg-blue" th:if="${question.column2==1}">提问</a>
+                        <a class="layui-badge layui-bg-blue" th:if="${question.column2==2}">分享</a>
+                        <a class="layui-badge layui-bg-blue" th:if="${question.column2==3}">建议</a>
+                        <a class="layui-badge layui-bg-blue" th:if="${question.column2==4}">讨论</a>
+                        <a class="layui-badge layui-bg-green" th:if="${question.column2==5}">公告</a>
+                        <a class="layui-badge layui-bg-blue" th:if="${question.column2==6}">动态</a>
+                        <a class="layui-badge layui-bg-blue" th:if="${question.column2==9}">其它</a>
                         <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
+                        <a th:if="${question.viewCount>100}" class="fly-list-like layui-hide-xs" title="烫烫烫"><i  class="layui-icon" style="font-size: 20px">&#xe756;</i></a>
+                        <span style="float: right">
+                            <span th:if="${question.status==1||question.status==3}" class="layui-badge layui-bg-red">精华</span>
+                            <span th:if="${question.status==2||question.status==3}" class="layui-badge layui-bg-orange">置顶</span>
+                        </span>
                     </h4>
                     <!--<span th:text="${question.description}"></span><br>-->
+                    <a th:href="${'/user/'+question.user.id}" link target="_blank">
+                        <i th:if="${question.userAccount.vipRank==1}" class="layui-icon fly-list-kiss" title="红砖会员等级：LV1">&#xe735</i>
+                        <cite th:class="${question.userAccount.vipRank==1? 'fly-list-kiss':''}" th:text="${question.user.name}"></cite>
+                        <i class="layui-badge fly-badge-vip layui-bg-gray layui-hide-xs" th:text="${@environment.getProperty('user.group.r'+question.userAccount.groupId)}"></i>
+                    </a>
                     <span class="text-desc">
                         • <span th:text="${question.commentCount}"></span>个评论
                         • <span th:text="${question.viewCount}"></span>次浏览
@@ -73,7 +91,7 @@
             <div class="media" th:each="question : ${pagination.data}" style="overflow: visible">
                 <div th:if="${question.status==0||question.status==1}">
                     <div class="media-left avatar">
-                        <a href="#">
+                        <a th:href="${'/user/'+question.user.id}">
                             <img class="media-object img-rounded"
                                  th:src="${question.user.avatarUrl}"
                                  th:alt="${question.user.name}">
@@ -81,17 +99,31 @@
                     </div>
                     <div class="media-body">
                         <h4 class="media-heading">
-                            <span th:if="${question.status==2||question.status==3}"class="label label-warning">置顶</span>
-                            <span th:if="${question.status==1||question.status==3}" class="label label-danger">精华</span>
+                            <a class="layui-badge layui-bg-blue" th:if="${question.column2==1}">提问</a>
+                            <a class="layui-badge layui-bg-blue" th:if="${question.column2==2}">分享</a>
+                            <a class="layui-badge layui-bg-blue" th:if="${question.column2==3}">建议</a>
+                            <a class="layui-badge layui-bg-blue" th:if="${question.column2==4}">讨论</a>
+                            <a class="layui-badge layui-bg-green" th:if="${question.column2==5}">公告</a>
+                            <a class="layui-badge layui-bg-blue" th:if="${question.column2==6}">动态</a>
+                            <a class="layui-badge layui-bg-blue" th:if="${question.column2==9}">其它</a>
                             <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
+                            <a th:if="${question.viewCount>100}" class="fly-list-like layui-hide-xs" title="烫烫烫"><i  class="layui-icon" style="font-size: 20px">&#xe756;</i></a>
+                            <span style="float: right">
+                                <span th:if="${question.status==1||question.status==3}" class="layui-badge layui-bg-red">精华</span>
+                            </span>
                         </h4>
                         <!--<span th:text="${question.description}"></span><br>-->
+                        <a th:href="${'/user/'+question.user.id}" link target="_blank">
+                            <i th:if="${question.userAccount.vipRank==1}" class="layui-icon fly-list-kiss" title="红砖会员等级：LV1">&#xe735</i>
+                            <cite th:class="${question.userAccount.vipRank==1? 'fly-list-kiss':''}" th:text="${question.user.name}"></cite>
+                            <i class="layui-badge fly-badge-vip layui-bg-gray layui-hide-xs" th:text="${@environment.getProperty('user.group.r'+question.userAccount.groupId)}"></i>
+                        </a>
                         <span class="text-desc">
                         • <span th:text="${question.commentCount}"></span>个评论
                         • <span th:text="${question.viewCount}"></span>次浏览
                         • <span th:text="${question.likeCount}"></span>人收藏
                         • <span th:text="${#dates.format(question.gmtLatestComment,'yyyy-MM-dd HH:mm')}"></span>
-                    </span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -127,7 +159,6 @@
             </nav>
         </div>
         <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
-            <div th:insert="~{notice :: notice}"></div>
             <!--热门标签-->
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 panel panel-info">
                 <div class="panel-heading" align="center">
@@ -138,8 +169,10 @@
                        th:text="${hotTag}" class="community-tag"></a>
                 </div>
             </div>
-            <div th:insert="~{side :: side}"></div>
+            <div th:insert="~{notice :: notice}"></div>
+            <div th:insert="~{common/sider :: common_ad}"></div>
         </div>
+        <!--<div th:insert="~{common/sider :: index}"></div>-->
     </div>
 </div>
 <div th:insert="~{footer :: foot}"></div>

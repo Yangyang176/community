@@ -99,12 +99,12 @@ public class AuthorizeController {
             user.setToken(token);
             user.setBaiduAccountId("" + baiduUser.getUserid());
             user.setAvatarUrl("http://tb.himg.baidu.com/sys/portrait/item/" + baiduUser.getPortrait());
-
+            
             BeanUtils.copyProperties(baiduUser,userInfo);
             // System.out.println("生日:"+userInfo.getBirthday()+"realname:"+userInfo.getRealname());
             // userInfo.setUserId();
-            User loginuser = (User) request.getSession().getAttribute("user");
-            int flag = userService.createOrUpdateBaidu(user,loginuser,userInfo);
+            User loginUser = (User) request.getSession().getAttribute("user");
+            int flag = userService.createOrUpdateBaidu(user,loginUser,userInfo);
             if(flag == 1) {//创建百度账号
                 model.addAttribute("rsTitle", "成功啦！！！");
                 model.addAttribute("rsMessage", "您已使用百度账号成功注册本站！");

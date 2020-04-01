@@ -25,10 +25,10 @@ public class BaiduProvider {
             JSONObject obj = JSONObject.parseObject(string);
             String access_token = obj.getString("access_token");
 
-//             String token = string.split("&")[0].split("=")[1];
-
+//            String token = string.split("&")[0].split("=")[1];
 //            System.out.println("jsonstring"+JSON.toJSONString(baiduAccessTokenDTO));
 //            System.out.println("string为"+string+"access_token为"+access_token);
+
             return access_token;
         } catch (Exception e) {
             e.printStackTrace();

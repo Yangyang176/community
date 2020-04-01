@@ -104,6 +104,9 @@
             <if test="sort != null and sort != '' and sort == 'good'">
                 and status = 3
             </if>
+            <if test="sort != null and sort != '' and sort == 'good'">
+                order by gmt_latest_comment desc
+            </if>
             <if test="time != null and time != ''">
                 and gmt_create > #{time}
             </if>

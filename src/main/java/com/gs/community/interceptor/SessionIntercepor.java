@@ -1,9 +1,10 @@
 package com.gs.community.interceptor;
 
 import com.gs.community.enums.AdPosEnum;
+import com.gs.community.mapper.UserAccountMapper;
+import com.gs.community.mapper.UserInfoMapper;
 import com.gs.community.mapper.UserMapper;
-import com.gs.community.model.User;
-import com.gs.community.model.UserExample;
+import com.gs.community.model.*;
 import com.gs.community.service.AdService;
 import com.gs.community.service.NavService;
 import com.gs.community.service.NotificationService;
@@ -23,6 +24,10 @@ public class SessionIntercepor implements HandlerInterceptor {
     @Autowired(required = false)
     private UserMapper userMapper;
     @Autowired
+    private UserAccountMapper userAccountMapper;
+    @Autowired
+    private UserInfoMapper userInfoMapper;
+    @Autowired
     private NotificationService notificationService;
     @Autowired
     private NavService navService;
@@ -31,7 +36,7 @@ public class SessionIntercepor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-//        设置context级别的属性
+//        设置context级别的属性 设置广告
         for (AdPosEnum adPos : AdPosEnum.values()) {
             request.getServletContext().setAttribute(adPos.name(), adService.list(adPos.name()));
         }
@@ -45,9 +50,25 @@ public class SessionIntercepor implements HandlerInterceptor {
                     List<User> users = userMapper.selectByExample(userExample);
                     if (users.size() != 0) {
                         HttpSession session = request.getSession();
-                        session.setAttribute("user", users.get(0));
-                        Integer unreadCount = notificationService.unreadCount(users.get(0).getId());
+                        User user = users.get(0);
+                        UserAccountExample userAccountExample = new UserAccountExample();
+                        userAccountExample.createCriteria().andUserIdEqualTo(user.getId());
+                        List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
+                        UserAccount userAccount = userAccounts.get(0);
+                        UserInfoExample userInfoExample = new UserInfoExample();
+                        userInfoExample.createCriteria().andUserIdEqualTo(user.getId());
+                        List<UserInfo> userInfos = userInfoMapper.selectByExample(userInfoExample);
+                        UserInfo userInfo = userInfos.get(0);
+                        session.setAttribute("user", user);
+                        session.setAttribute("userAccount",userAccount);
+                        session.setAttribute("userInfo",userInfo);
+                        Integer unreadCount = notificationService.unreadCount(user.getId());
                         session.setAttribute("unreadCount", unreadCount);
+                        UserExample example = new UserExample();
+                        user.setGmtModified(System.currentTimeMillis());
+                        example.createCriteria()
+                                .andIdEqualTo(user.getId());
+                        userMapper.updateByExampleSelective(user, example);
                     }
                     break;
                 }

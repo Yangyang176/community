@@ -10,6 +10,7 @@ import com.gs.community.mapper.*;
 import com.gs.community.model.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +34,52 @@ public class CommentService {
     private CommentExtMapper commentExtMapper;
     @Autowired
     private NotificationMapper notificationMapper;
+    @Autowired
+    private UserAccountMapper userAccountMapper;
+    @Autowired
+    private UserAccountExtMapper userAccountExtMapper;
+    @Value("${score1.comment.inc}")
+    private Integer score1CommentInc;
+    @Value("${score2.comment.inc}")
+    private Integer score2CommentInc;
+    @Value("${score3.comment.inc}")
+    private Integer score3CommentInc;
+    @Value("${score1.commented.inc}")
+    private Integer score1CommentedInc;
+    @Value("${score2.commented.inc}")
+    private Integer score2CommentedInc;
+    @Value("${score3.commented.inc}")
+    private Integer score3CommentedInc;
+    @Value("${user.score1.priorities}")
+    private Integer score1Priorities;
+    @Value("${user.score2.priorities}")
+    private Integer score2Priorities;
+    @Value("${user.score3.priorities}")
+    private Integer score3Priorities;
+
+    @Value("${user.group.r1.max}")
+    private Integer r1Max;
+    @Value("${user.group.r2.max}")
+    private Integer r2Max;
+    @Value("${user.group.r3.max}")
+    private Integer r3Max;
+    @Value("${user.group.r4.max}")
+    private Integer r4Max;
+    @Value("${user.group.r5.max}")
+    private Integer r5Max;
+
+    private Integer[] rMaxs = null;
+
+    //懒汉式单例获取rMaxs
+    private Integer[] getRMaxs() {
+        if (rMaxs == null) {
+            rMaxs = new Integer[]{r1Max, r2Max, r3Max, r4Max, r5Max};
+        }
+        return rMaxs;
+    }
 
     @Transactional
-    public void insert(Comment comment, User commentator) {
+    public void insert(Comment comment, User commentator, UserAccount userAccount) {
         if (comment.getParentId() == null || comment.getParentId() == 0) {
             throw new CustomizeException(CustomizeErrorCode.TARGET_PARAM_NOT_FOUND);
         }
@@ -58,7 +102,7 @@ public class CommentService {
             QuestionExample example = new QuestionExample();
             example.createCriteria().andIdEqualTo(parentQuestion.getId());
             int update = questionMapper.updateByExampleSelective(parentQuestion, example);
-            if (update != 1){
+            if (update != 1) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
 
@@ -78,7 +122,7 @@ public class CommentService {
             QuestionExample example = new QuestionExample();
             example.createCriteria().andIdEqualTo(parentQuestion.getId());
             int update = questionMapper.updateByExampleSelective(parentQuestion, example);
-            if (update != 1){
+            if (update != 1) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
             commentMapper.insert(comment);
@@ -87,10 +131,42 @@ public class CommentService {
             //创建通知
             createNotify(comment, parentQuestion.getCreator(), commentator.getName(), parentQuestion.getTitle(), NotificationTypeEnum.REPLY_QUESTION, parentQuestion.getId());
         }
+        if (userAccount.getVipRank() != 0) {//VIP积分策略，可自行修改，这里简单处理
+            score1CommentInc = score1CommentInc * 2;
+            score2CommentInc = score2CommentInc * 2;
+        }
+        userAccount = new UserAccount();
+        userAccount.setUserId(comment.getCommentator());
+        userAccount.setScore1(score1CommentInc);
+        userAccount.setScore2(score2CommentInc);
+        userAccount.setScore3(score3CommentInc);
+        userAccount.setScore(score1CommentInc * score1Priorities + score2CommentInc * score2Priorities + score3CommentInc * score3Priorities);
+        userAccountExtMapper.incScore(userAccount);
+        updateUserAccoundByUserId(comment.getCommentator());
+        userAccount = null;
+    }
+
+    private void updateUserAccoundByUserId(Integer userId) {
+        UserAccountExample userAccountExample = new UserAccountExample();
+        userAccountExample.createCriteria().andUserIdEqualTo(userId);
+        List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
+        UserAccount userAccount = userAccounts.get(0);
+        Integer groupId = userAccount.getGroupId();
+        Integer score = userAccount.getScore();
+        Integer[] rMaxs = getRMaxs();
+        Integer nowGroupId = 1;
+        for (Integer rMax : rMaxs) {
+            if (score > rMax) nowGroupId++;
+            else break;
+        }
+        if (groupId > 0 && groupId < 10 && nowGroupId != groupId) {
+            userAccount.setGroupId(nowGroupId);
+            userAccountMapper.updateByExample(userAccount, userAccountExample);
+        }
     }
 
     private void createNotify(Comment comment, Integer receiver, String notifierName, String outerTitle, NotificationTypeEnum notificationTypeEnum, Integer outerId) {
-        if (receiver == comment.getCommentator()){
+        if (receiver == comment.getCommentator()) {
             return;
         }
         Notification notification = new Notification();
@@ -103,6 +179,23 @@ public class CommentService {
         notification.setOuterTitle(outerTitle);
         notification.setStatus(NotificationStatusEnum.UNREAD.getStatus());
         notificationMapper.insert(notification);
+
+        UserAccountExample userAccountExample = new UserAccountExample();
+        userAccountExample.createCriteria().andUserIdEqualTo(receiver);
+        List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
+        UserAccount userAccount = userAccounts.get(0);
+        if (userAccount.getVipRank() != 0) {//VIP积分策略，可自行修改，这里简单处理
+            score1CommentedInc = score1CommentedInc * 2;
+            score2CommentedInc = score2CommentedInc * 2;
+        }
+        userAccount.setUserId(receiver);
+        userAccount.setScore1(score1CommentedInc);
+        userAccount.setScore2(score2CommentedInc);
+        userAccount.setScore3(score3CommentedInc);
+        userAccount.setScore(score1CommentedInc * score1Priorities + score2CommentedInc * score2Priorities + score3CommentedInc * score3Priorities);
+        userAccountExtMapper.incScore(userAccount);
+        updateUserAccoundByUserId(receiver);
+        userAccount = null;
     }
 
     public List<CommentDTO> listByTargetId(Integer id, CommentTypeEnum typeEnum) {
@@ -129,8 +222,30 @@ public class CommentService {
             CommentDTO commentDTO = new CommentDTO();
             BeanUtils.copyProperties(comment, commentDTO);
             commentDTO.setUser(userMap.get(comment.getCommentator()));
+            UserAccountExample userAccountExample = new UserAccountExample();
+            userAccountExample.createCriteria().andUserIdEqualTo(userMap.get(comment.getCommentator()).getId());
+            List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
+            UserAccount userAccount = userAccounts.get(0);
+            commentDTO.setUserAccount(userAccount);
             return commentDTO;
         }).collect(Collectors.toList());
         return commentDTOS;
+    }
+
+    public int delCommentByIdAndType(Integer userId, Integer groupId, Integer id, Integer type) {
+        int c = 0;
+        if (groupId >= 18) {
+            c = commentMapper.deleteByPrimaryKey(id);
+        } else {
+            CommentExample commentExample = new CommentExample();
+            commentExample.createCriteria().andIdEqualTo(id).andCommentatorEqualTo(userId);
+            c = commentMapper.deleteByExample(commentExample);
+        }
+        if (c > 0 && type == 1) {
+            CommentExample commentExample = new CommentExample();
+            commentExample.createCriteria().andTypeEqualTo(2).andParentIdEqualTo(id);
+            c += commentMapper.deleteByExample(commentExample);
+        }
+        return c;
     }
 }

@@ -3,18 +3,18 @@ package com.gs.community.service;
 import com.gs.community.dto.PaginationDTO;
 import com.gs.community.dto.QuestionDTO;
 import com.gs.community.dto.QuestionQueryDTO;
+import com.gs.community.dto.UserDTO;
 import com.gs.community.enums.SortEnum;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
-import com.gs.community.mapper.QuestionExtMapper;
-import com.gs.community.mapper.QuestionMapper;
-import com.gs.community.mapper.ThumbMapper;
-import com.gs.community.mapper.UserMapper;
+import com.gs.community.mapper.*;
 import com.gs.community.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,8 +31,31 @@ public class QuestionService {
     private QuestionExtMapper questionExtMapper;
     @Autowired
     private ThumbMapper thumbMapper;
+    @Autowired
+    private UserAccountMapper userAccountMapper;
+    @Autowired
+    private UserAccountExtMapper userAccountExtMapper;
+    @Autowired
+    private LikeService likeService;
+    @Autowired
+    private UserAccountService userAccountService;
+    @Value("${score1.publish.inc}")
+    private Integer score1PublishInc;
+    @Value("${score2.publish.inc}")
+    private Integer score2PublishInc;
+    @Value("${score3.publish.inc}")
+    private Integer score3PublishInc;
+    @Value("${user.score1.priorities}")
+    private Integer score1Priorities;
+    @Value("${user.score2.priorities}")
+    private Integer score2Priorities;
+    @Value("${user.score3.priorities}")
+    private Integer score3Priorities;
 
-    public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort) {
+    @Autowired
+    private Environment env;
+
+    public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort, UserAccount userAccount) {
         if (StringUtils.isNotBlank(search)) {
             search = search.replace(",", "|").replace("+", "")
                     .replace("*", "").replace("&", "").replace("?", "");
@@ -85,9 +108,21 @@ public class QuestionService {
         List<QuestionDTO> queryDTOList = new ArrayList<>();
         for (Question question : questions) {
             User user = userMapper.selectByPrimaryKey(question.getCreator());
+            UserAccountExample userAccountExample = new UserAccountExample();
+            userAccountExample.createCriteria().andUserIdEqualTo(user.getId());
+            List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
             QuestionDTO queryDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, queryDTO);
-            queryDTO.setUser(user);
+            UserDTO userDTO = new UserDTO();
+            BeanUtils.copyProperties(user, userDTO);
+            queryDTO.setUser(userDTO);
+            queryDTO.setUserAccount(userAccounts.get(0));
+            queryDTO.setUserGroupName(env.getProperty("user.group.r" + userAccounts.get(0).getGroupId()));
+//            queryDTO.setGmtLatestCommentStr();
+            if (queryDTO.getPermission() == 0) queryDTO.setIsVisible(1);
+            else if (userAccount != null && userAccount.getGroupId() >= queryDTO.getPermission())
+                queryDTO.setIsVisible(1);
+            else queryDTO.setIsVisible(0);
             queryDTOList.add(queryDTO);
         }
         paginationDTO.setData(queryDTOList);
@@ -125,9 +160,12 @@ public class QuestionService {
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO queryDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, queryDTO);
-            queryDTO.setUser(user);
+            UserDTO userDTO = new UserDTO();
+            BeanUtils.copyProperties(user, userDTO);
+            queryDTO.setUser(userDTO);
             queryDTOList.add(queryDTO);
         }
+        paginationDTO.setTotalCount(totalCount);
         paginationDTO.setData(queryDTOList);
         return paginationDTO;
     }
@@ -140,11 +178,13 @@ public class QuestionService {
         QuestionDTO queryDTO = new QuestionDTO();
         BeanUtils.copyProperties(question, queryDTO);
         User user = userMapper.selectByPrimaryKey(question.getCreator());
-        queryDTO.setUser(user);
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(user, userDTO);
+        queryDTO.setUser(userDTO);
         return queryDTO;
     }
 
-    public void createOrUpdate(Question question) {
+    public void createOrUpdate(Question question, UserAccount userAccount) {
         if (question.getId() == null) {
             //插入
             question.setGmtCreate(System.currentTimeMillis());
@@ -155,17 +195,30 @@ public class QuestionService {
             question.setCommentCount(0);
             question.setStatus(0);
             questionMapper.insert(question);
+            if (userAccount.getVipRank() != 0) {
+                score1PublishInc = score1PublishInc * 2;
+                score2PublishInc = score2PublishInc * 2;
+            }
+            userAccount = new UserAccount();
+            userAccount.setUserId(question.getCreator());
+            userAccount.setScore1(score1PublishInc);
+            userAccount.setScore2(score2PublishInc);
+            userAccount.setScore3(score3PublishInc);
+            userAccount.setScore(score1PublishInc * score1Priorities + score2PublishInc * score2Priorities + score3PublishInc * score3Priorities);
+            userAccountExtMapper.incScore(userAccount);
+            userAccount = null;
         } else {
             //修改
-            Question updateQuestion = questionMapper.selectByPrimaryKey(question.getId());
+            /*Question updateQuestion = questionMapper.selectByPrimaryKey(question.getId());
 //            Question updateQuestion = new Question();
             updateQuestion.setGmtModified(System.currentTimeMillis());
             updateQuestion.setTitle(question.getTitle());
             updateQuestion.setDescription(question.getDescription());
-            updateQuestion.setTag(question.getTag());
+            updateQuestion.setTag(question.getTag());*/
+            question.setGmtModified(System.currentTimeMillis());
             QuestionExample example = new QuestionExample();
             example.createCriteria().andIdEqualTo(question.getId());
-            int updated = questionMapper.updateByExampleSelective(updateQuestion, example);
+            int updated = questionMapper.updateByExampleSelective(question, example);
             if (updated != 1) {
                 throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
             }
@@ -229,9 +282,15 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question question : questions) {
             User user = userMapper.selectByPrimaryKey(question.getCreator());
+            UserAccountExample userAccountExample = new UserAccountExample();
+            userAccountExample.createCriteria().andUserIdEqualTo(user.getId());
+            List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
             QuestionDTO queryDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, queryDTO);
-            queryDTO.setUser(user);
+            UserDTO userDTO = new UserDTO();
+            BeanUtils.copyProperties(user, userDTO);
+            queryDTO.setUser(userDTO);
+            queryDTO.setUserAccount(userAccounts.get(0));
             questionDTOList.add(queryDTO);
         }
         return questionDTOList;
@@ -271,7 +330,9 @@ public class QuestionService {
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             BeanUtils.copyProperties(question, questionDTO);
-            questionDTO.setUser(user);
+            UserDTO userDTO = new UserDTO();
+            BeanUtils.copyProperties(user, userDTO);
+            questionDTO.setUser(userDTO);
             questionDTOList.add(questionDTO);
         }
 
@@ -279,5 +340,67 @@ public class QuestionService {
         paginationDTO.setPagination(totalPage, page);
         paginationDTO.setTotalCount(totalCount);
         return paginationDTO;
+    }
+
+    public QuestionDTO getById(Integer id, Integer userId) {
+        Question question = questionMapper.selectByPrimaryKey(id);
+        if (question == null) {
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+        }
+        QuestionDTO questionDTO = new QuestionDTO();
+        BeanUtils.copyProperties(question, questionDTO);
+        User user = userMapper.selectByPrimaryKey(question.getCreator());
+        UserAccountExample userAccountExample = new UserAccountExample();
+        userAccountExample.createCriteria().andUserIdEqualTo(user.getId());
+        List<UserAccount> userAccounts = userAccountMapper.selectByExample(userAccountExample);
+        UserAccount userAccount = userAccounts.get(0);
+        UserDTO userDTO = new UserDTO();
+        BeanUtils.copyProperties(user, userDTO);
+        questionDTO.setUser(userDTO);
+        questionDTO.setUserAccount(userAccount);
+        questionDTO = setStatuses(questionDTO, userId);
+        return questionDTO;
+    }
+
+    public QuestionDTO setStatuses(QuestionDTO questionDTO, Integer userId) {
+        questionDTO.setEdited(questionDTO.getGmtCreate().longValue() != questionDTO.getGmtModified().longValue());
+        if ((questionDTO.getStatus() & 1) == 1) questionDTO.setEssence(true);
+        if ((questionDTO.getStatus() & 2) == 2) questionDTO.setSticky(true);
+        if (userId != 0) {
+            if (likeService.queryLike(questionDTO.getId(), 1, userId) > 0) questionDTO.setFavorite(true);
+            if (userAccountService.isAdminByUserId(userId)) {
+                questionDTO.setCanClassify(true);
+                questionDTO.setCanDelete(true);
+                questionDTO.setCanEssence(true);
+                questionDTO.setCanSticky(true);
+                if (userId == questionDTO.getCreator()) questionDTO.setCanEdit(true);
+                questionDTO.setCanPromote(true);
+            } else if (userId == questionDTO.getCreator()) {
+                questionDTO.setCanEdit(true);
+                questionDTO.setCanClassify(true);
+                questionDTO.setCanDelete(true);
+            }
+        }
+        return questionDTO;
+    }
+
+    public int delQuestionById(Integer userId, Integer groupId, Integer id) {
+        int c = 0;
+        if (groupId >= 18) {
+            c = questionMapper.deleteByPrimaryKey(id);
+        } else {
+            QuestionExample questionExample = new QuestionExample();
+            questionExample.createCriteria().andIdEqualTo(id).andCreatorEqualTo(userId);
+            c = questionMapper.deleteByExample(questionExample);
+        }
+        return c;
+    }
+
+    public Question getQuestionById(Integer id) {
+        return questionMapper.selectByPrimaryKey(id);
+    }
+
+    public int updateQuestion(Question question) {
+        return questionMapper.updateByPrimaryKeySelective(question);
     }
 }

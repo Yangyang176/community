@@ -45,9 +45,9 @@ function like2target(targetId, type){
                     likecount.html(parseInt(likecount.text())+1);//点赞+1
                 }
                 if(type==1){//收藏问题时
-                    var thumbicon = $("questionlikespan-" + targetId);
+                    /*var thumbicon = $("questionlikespan-" + targetId);
                     thumbicon.removeClass("glyphicon-heart-empty");
-                    thumbicon.addClass("glyphicon-heart");
+                    thumbicon.addClass("glyphicon-heart");*/
                     var likecount = $("#questionlikecount-" + targetId);
                     likecount.html(parseInt(likecount.text())+1);//收藏+1
                 }
@@ -189,7 +189,7 @@ function collapseComment(e) {
                         "class":"menu"
                     }).append($("<span/>",{
                         "class":"pull-right",
-                        "html":moment(comment.gmtCreate).format("YYYY-MM-DD")
+                        "html":moment(comment.gmtCreate).format("YYYY-MM-DD hh:mm")
                     })));
                     var mediaElement = $("<div/>",{
                         "class":"media"

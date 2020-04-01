@@ -104,4 +104,26 @@ public class LikeService {
         notification.setOuterTitle(outerTitle);
         notificationMapper.insert(notification);
     }
+
+    public int removeLikeByIdAndType(Integer userId, Integer id, Integer type) {
+
+        Question dbQuestion = questionMapper.selectByPrimaryKey(id);
+        if (dbQuestion == null) {
+            throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+        }
+        //减少问题收藏数
+        dbQuestion.setId(id);
+        dbQuestion.setLikeCount(-1);
+        thumbExtMapper.incQuestionLikeCount(dbQuestion);
+        //取消收藏问题
+        ThumbExample thumbExample = new ThumbExample();
+        thumbExample.createCriteria().andLikerEqualTo(userId).andTypeEqualTo(type).andTargetIdEqualTo(id);
+        return thumbMapper.deleteByExample(thumbExample);
+    }
+
+    public int queryLike(Integer targetId, Integer type, Integer liker) {
+        ThumbExample thumbExample = new ThumbExample();
+        thumbExample.createCriteria().andLikerEqualTo(liker).andTypeEqualTo(type).andTargetIdEqualTo(targetId);
+        return thumbMapper.selectByExample(thumbExample).size();
+    }
 }

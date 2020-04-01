@@ -10,4 +10,5 @@ public class QuestionQueryDTO {
     private String tag;
     private String sort;
     private Long time;
+    private Integer column2;
 }

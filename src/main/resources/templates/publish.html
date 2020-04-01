@@ -5,89 +5,163 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/mylay.css">
     <link rel="stylesheet" href="/css/editormd.min.css">
     <link rel="stylesheet" href="/css/community.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
     <script src="/js/jquery-3.3.1.min.js"></script>
     <script src="/js/bootstrap.min.js" type="application/javascript"></script>
     <script src="/js/editormd.min.js" type="application/javascript"></script>
+    <script src="/js/sweetalert.min.js"></script>
+    <script src="/layui/layui.js" type="application/javascript"></script>
     <script src="/js/community.js" type="application/javascript"></script>
 </head>
 <body>
 <div th:insert="~{navigation :: nav}"></div>
 <div class="container-fluid main">
-    <div class="row" style="padding-right: 15px;">
-        <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
-            <h3><span class="glyphicon glyphicon-plus" aria-hidden="true"> 发布</span></h3>
-            <hr>
-            <form action="/publish" method="post">
-                <input type="hidden" name="id" th:value="${id}">
-                <div class="form-group">
-                    <label for="title">问题标题（简单扼要）</label>
-                    <input type="text" class="form-control" id="title" name="title" th:value="${title}"
-                           placeholder="问题标题..." autocomplete="off">
-                </div>
-                <div class="form-group" id="question-editor">
-                    <label for="title">问题补充（必填，参照右侧提示）</label>
-                    <textarea name="description" id="description" th:text="${description}" style="display:none;"
-                              class="form-control" cols="30" rows="10"></textarea>
-                    <script type="text/javascript">
-                        $(function () {
-                            editormd("question-editor", {
-                                width: "100%",
-                                height: "350px",
-                                path: "/js/lib/",
-                                delay: 0,
-                                watch: false,
-                                placeholder: "请输入问题描述...",
-                                imageUpload: true,
-                                imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
-                                imageUploadURL: "/file/upload",
-                                emoji: true
-                            });
-                        });
-                    </script>
-                </div>
-                <div class="form-group">
-                    <label for="title">添加标签</label>
-                    <input type="text" class="form-control" id="tag" name="tag" th:value="${tag}"
-                           placeholder="输入标签，以，分隔" autocomplete="off" onclick="showSelectTag()">
-                    <div class="publish-tag-tab" id="select-tag">
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" th:each="selectTagDTO,selectTagDTOStat : ${tagDTOs}"
-                                th:class="${selectTagDTOStat.first ? 'active' : ''}">
-                                <a th:href="${'#'+selectTagDTO.categoryName}" aria-controls="home" role="tab"
-                                   data-toggle="tab" th:text="${selectTagDTO.categoryName}"></a>
-                            </li>
-                        </ul>
-                        <div class="tab-content publish-tags">
-                            <div role="tabpanel" th:id="${selectTagDTO.categoryName}"
-                                 th:each="selectTagDTO,selectTagDTOStat : ${tagDTOs}"
-                                 th:class="${selectTagDTOStat.first ? 'active tab-pane' : 'tab-pane'}">
+    <div class="layui-form layui-form-pane">
+        <div class="layui-tab layui-tab-brief" lay-filter="user">
+            <div class="layui-form layui-tab-content" id="LAY_ucm">
+                <div class="row" style="padding-right: 15px;">
+                    <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
+                        <h3><span class="glyphicon glyphicon-plus" aria-hidden="true"> 发布</span></h3>
+                        <hr>
+                        <form action="/publish" method="post">
+                            <input type="hidden" name="id" th:value="${id}">
+                            <div class="form-group">
+                                <label for="title">问题标题（简单扼要）</label>
+                                <input type="text" class="form-control" id="title" name="title" th:value="${title}"
+                                       placeholder="问题标题..." autocomplete="off">
+                            </div>
+                            <div class="form-group" id="question-editor">
+                                <label for="title">问题补充（必填，参照右侧提示）</label>
+                                <textarea name="description" id="description" th:text="${description}" style="display:none;"
+                                          class="form-control" cols="30" rows="10"></textarea>
+                                <script type="text/javascript">
+                                    $(function () {
+                                        editormd("question-editor", {
+                                            width: "100%",
+                                            height: "350px",
+                                            path: "/js/lib/",
+                                            delay: 0,
+                                            watch: false,
+                                            placeholder: "请输入问题描述...",
+                                            imageUpload: true,
+                                            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                                            imageUploadURL: "/file/upload",
+                                            emoji: true
+                                        });
+                                    });
+                                </script>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">添加标签</label>
+                                <input type="text" class="form-control" id="tag" name="tag" th:value="${tag}"
+                                       placeholder="输入标签，以，分隔" autocomplete="off" onclick="showSelectTag()">
+                                <div class="publish-tag-tab" id="select-tag">
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li role="presentation" th:each="selectTagDTO,selectTagDTOStat : ${tagDTOs}"
+                                            th:class="${selectTagDTOStat.first ? 'active' : ''}">
+                                            <a th:href="${'#'+selectTagDTO.categoryName}" aria-controls="home" role="tab"
+                                               data-toggle="tab" th:text="${selectTagDTO.categoryName}"></a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content publish-tags">
+                                        <div role="tabpanel" th:id="${selectTagDTO.categoryName}"
+                                             th:each="selectTagDTO,selectTagDTOStat : ${tagDTOs}"
+                                             th:class="${selectTagDTOStat.first ? 'active tab-pane' : 'tab-pane'}">
                                 <span th:each="selectTag : ${selectTagDTO.tags}">
                                     <span class="community-tag" onclick="selectTag(this)" th:data-tag="${selectTag}"
                                           th:text="${''+selectTag}"></span>
                                 </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            <div class="form-group" >
+                                <label class="layui-form-label">所在专栏</label>
+                                <div class="layui-input-block" style="width: 190px;">
+                                    <select lay-verify="required" id="column2" name="column2" lay-filter="column" >
+                                        <option></option>
+                                        <option value="1" th:selected="${column2==1}">提问</option>
+                                        <option value="2" th:selected="${column2==2}" >分享</option>
+                                        <option value="3" th:selected="${column2==3}">建议</option>
+                                        <option value="4" th:selected="${column2==4}">讨论</option>
+                                        <option th:if="${session.userAccount!=null&&session.userAccount.groupId==21}" th:selected="${column2==5}" value="5">公告</option>
+                                        <option value="6" th:selected="${column2==6}">动态</option>
+                                        <option value="9" th:selected="${column2==9}">其它</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">阅读权限</label>
+                                    <div class="layui-input-inline" style="width: 190px;">
+                                        <select lay-verify="required" id="permission" name="permission">
+                                            <option value="0" selected>默认，所有用户可见</option>
+                                            <option value="1">LV1及以上用户可见</option>
+                                            <option value="2">LV2及以上用户可见</option>
+                                            <option value="3">LV3及以上用户可见</option>
+                                            <option value="4">LV4及以上用户可见</option>
+                                            <option value="5">LV5及以上用户可见</option>
+                                            <option value="6">LV6及以上用户可见</option>
+                                            <option value="10">会员专享</option>
+                                            <option value="19">管理员可见</option>
+                                        </select>
+                                    </div>
+                                    <!--<div class="layui-form-mid layui-word-aux">除非有重要信息，不然建议设置所有用户可见，这样不会影响您帖子的人气，点击查看<a class="fly-link" target="_blank" href="/user/set/info#userGroup">用户组权限</a></div>-->
+                                </div>
+                            </div>
+                            <div class="btn btn-danger" th:if="${error != null}" th:text="${error}"></div>
+                            <button type="submit" class="btn btn-success btn-publish">发布</button>
+                        </form>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12 panel panel-info" style="margin-top: 15px";>
+                        <div class="panel-heading" style="text-align: center">
+                            <h3>问题发起指南</h3>
+                        </div>
+                        <div class="panel-body">
+                            • 问题标题: 请用精简的语言描述您发布的问题，不超过25字 <br>
+                            • 问题补充: 详细补充您的问题内容，并确保问题描述清晰直观, 并提供一些相关的资料<br>
+                            • 选择标签: 选择一个或者多个合适的标签，用逗号隔开，每个标签不超过10个字<br>
+                            • 所在专栏: 给你的问题选择一个专栏<br>
+                            • 阅读权限: 除非有重要信息，不然建议设置所有用户可见，这样不会影响您帖子的人气，点击查看
+                            <a class="fly-link" target="_blank" href="/user/set/info#userGroup">用户组权限</a>
                         </div>
                     </div>
                 </div>
-                <div class="btn btn-danger" th:if="${error != null}" th:text="${error}"></div>
-                <button type="submit" class="btn btn-success btn-publish">发布</button>
-            </form>
-        </div>
-        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12 panel panel-info" style="margin-top: 15px";>
-            <div class="panel-heading" style="text-align: center">
-                <h3>问题发起指南</h3>
-            </div>
-            <div class="panel-body">
-                • 问题标题: 请用精简的语言描述您发布的问题，不超过25字 <br>
-                • 问题补充: 详细补充您的问题内容，并确保问题描述清晰直观, 并提供一些相关的资料<br>
-                • 选择标签: 选择一个或者多个合适的标签，用逗号隔开，每个标签不超过10个字<br>
             </div>
         </div>
     </div>
 </div>
 <div th:insert="~{footer :: foot}"></div>
+
+<script>
+    layui.cache.page = 'jie';
+    layui.cache.user = {
+        username: '游客'
+        ,uid: -1
+        ,avatar: '/images/avatar/00.jpg'
+        ,experience: 83
+        ,sex: '男'
+    };
+    layui.config({
+        version: "3.0.0"
+        ,base: '/mods/'
+    }).extend({
+        fly: 'index'
+    }).use('fly');
+    /*
+    layui.use('code', function(){ //加载code模块
+      layui.code({
+        elem: 'pre', //默认值为.layui-code
+        height:500,
+        about: false,
+      }); //引用code方法
+    });*/
+</script>
+
 </body>
 </html>

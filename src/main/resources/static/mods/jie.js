@@ -84,7 +84,7 @@ layui.define('fly', function(exports){
     del: function(div){
       layer.confirm('确认删除该贴么？删除后将无法恢复！', function(index){
         layer.close(index);
-        $.post('/p/del/id', {
+        $.post('/question/del/id', {
           id: div.data('id')
         }, function(res){
           if(res.code==200) {swal("Good job!", ""+res.msg, "success").then((value) => {
@@ -99,7 +99,7 @@ layui.define('fly', function(exports){
     //设置置顶等状态于操作
     ,set: function(div){
       var othis = $(this);
-      $.post('/p/set/id', {
+      $.post('/question/set/id', {
         id: div.data('id')
         ,rank: othis.attr('rank')
         ,field: othis.attr('field')
@@ -236,6 +236,7 @@ layui.define('fly', function(exports){
   });
 
 
+
   //定位分页
   if(/\/page\//.test(location.href) && !location.hash){
     var replyTop = $('#flyReply').offset().top - 80;
@@ -253,7 +254,7 @@ layui.define('fly', function(exports){
 
   //监听提交
   form.on('submit(submitAdmin)', function(data) {
-    $.post('/p/set/id', {
+    $.post('/question/set/id', {
       id: data.field.id
       ,json: JSON.stringify(data.field)
       ,field: 'admin'

@@ -15,7 +15,7 @@ public class PaginationDTO<T> {
     private Integer page;
     private List<Integer> pages = new ArrayList<>();
     private Integer totalPage;
-    private  Integer totalCount;
+    private Integer totalCount;
 
     public void setPagination(Integer totalPage, Integer page) {
         this.totalPage = totalPage;
@@ -26,7 +26,7 @@ public class PaginationDTO<T> {
             page = totalPage;
         }
         this.page = page;
-        pages.add(page);
+        if (totalPage != 0) pages.add(page);
         for (int i = 1; i <= 3; i++) {
             if (page - i > 0) {
                 pages.add(0, page - i);
@@ -35,26 +35,26 @@ public class PaginationDTO<T> {
                 pages.add(page + i);
             }
         }
-        //是否展示下一页
-        if (page == 1) {
+        //是否展示上一页
+        if (page == 1 || totalPage == 0) {
             showPrevious = false;
         } else {
             showPrevious = true;
         }
-        //是否展示上一页
-        if (page == totalPage) {
+        //是否展示下一页
+        if (page == totalPage || totalPage == 0) {
             showNext = false;
         } else {
             showNext = true;
         }
         //是否展示第一页
-        if (pages.contains(1)) {
+        if (pages.contains(1) || totalPage == 0) {
             showFirstPage = false;
         } else {
             showFirstPage = true;
         }
         //是否展示最后一页
-        if (pages.contains(totalPage)) {
+        if (pages.contains(totalPage) || totalPage == 0) {
             showLastPage = false;
         } else {
             showLastPage = true;
