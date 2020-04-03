@@ -55,7 +55,7 @@ public class QuestionService {
     @Autowired
     private Environment env;
 
-    public PaginationDTO list(Integer page, Integer size, String search, String tag, String sort, UserAccount userAccount) {
+    public PaginationDTO listwithColumn(Integer page, Integer size, String search, String tag, String sort, Integer column2, UserAccount userAccount) {
         if (StringUtils.isNotBlank(search)) {
             search = search.replace(",", "|").replace("+", "")
                     .replace("*", "").replace("&", "").replace("?", "");
@@ -65,6 +65,7 @@ public class QuestionService {
 
         QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
         questionQueryDTO.setSearch(search);
+        if (column2 != null) questionQueryDTO.setColumn2(column2);
 
         if (StringUtils.isNotBlank(tag)) {
             tag = tag.replace("+", "").replace("*", "").replace("&", "")
@@ -250,7 +251,7 @@ public class QuestionService {
         return questionDTOS;
     }
 
-    public List<QuestionDTO> listTop(String search, String tag, String sort) {
+    public List<QuestionDTO> listTopwithColumn(String search, String tag, String sort, Integer column2) {
         if (StringUtils.isNotBlank(search)) {
             search = search.replace(",", "|").replace("+", "")
                     .replace("*", "").replace("&", "").replace("?", "");
@@ -258,6 +259,7 @@ public class QuestionService {
 
         QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
         questionQueryDTO.setSearch(search);
+        if (column2 != null) questionQueryDTO.setColumn2(column2);
 
         if (StringUtils.isNotBlank(tag)) {
             tag = tag.replace("+", "").replace("*", "").replace("&", "")
@@ -386,6 +388,7 @@ public class QuestionService {
 
     public int delQuestionById(Integer userId, Integer groupId, Integer id) {
         int c = 0;
+        Question question = questionMapper.selectByPrimaryKey(id);
         if (groupId >= 18) {
             c = questionMapper.deleteByPrimaryKey(id);
         } else {
@@ -393,6 +396,14 @@ public class QuestionService {
             questionExample.createCriteria().andIdEqualTo(id).andCreatorEqualTo(userId);
             c = questionMapper.deleteByExample(questionExample);
         }
+        UserAccount userAccount = new UserAccount();
+        userAccount.setUserId(question.getCreator());
+        userAccount.setScore1(score1PublishInc);
+        userAccount.setScore2(score2PublishInc);
+        userAccount.setScore3(score3PublishInc);
+        userAccount.setScore(score1PublishInc * score1Priorities + score2PublishInc * score2Priorities + score3PublishInc * score3Priorities);
+        userAccountExtMapper.decScore(userAccount);
+        userAccount = null;
         return c;
     }
 
@@ -402,5 +413,12 @@ public class QuestionService {
 
     public int updateQuestion(Question question) {
         return questionMapper.updateByPrimaryKeySelective(question);
+    }
+
+    public String getTextDescriptionFromHtml(String description) {
+        String textDescription = description.replaceAll("</?[^>]+>", "");//剔除<html>的标签
+        textDescription = textDescription.replaceAll("<a>\\s*|\t|\r|\n</a>", "");//去除字符串中的空格,回车,换行符,制表符
+        textDescription = textDescription.replaceAll("&nbsp;", "");//去除&nbsp;
+        return textDescription;
     }
 }

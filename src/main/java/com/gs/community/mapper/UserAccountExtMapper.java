@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface UserAccountExtMapper {
     int incScore(UserAccount userAccount);
+
+    int decScore(UserAccount userAccount);
 }

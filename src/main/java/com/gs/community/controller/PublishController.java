@@ -2,11 +2,13 @@ package com.gs.community.controller;
 
 import com.gs.community.cache.TagCache;
 import com.gs.community.dto.QuestionDTO;
+import com.gs.community.dto.ResultDTO;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
 import com.gs.community.model.Question;
 import com.gs.community.model.User;
 import com.gs.community.model.UserAccount;
+import com.gs.community.provider.BaiduCloudProvider;
 import com.gs.community.service.QuestionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class PublishController {
 
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private BaiduCloudProvider baiduCloudProvider;
 
     @GetMapping("/publish/{id}")
     public String edit(@PathVariable(name = "id") Integer id,
@@ -35,7 +39,7 @@ public class PublishController {
         }
         model.addAttribute("title", questionDTO.getTitle());
         model.addAttribute("description", questionDTO.getDescription());
-        model.addAttribute("column2",questionDTO.getColumn2());
+        model.addAttribute("column2", questionDTO.getColumn2());
         model.addAttribute("tag", questionDTO.getTag());
         model.addAttribute("id", questionDTO.getId());
         model.addAttribute("tagDTOs", TagCache.get());
@@ -61,9 +65,9 @@ public class PublishController {
         title = title.trim();
         tag = tag.trim();
         model.addAttribute("title", title);
-        model.addAttribute("description", description);
         model.addAttribute("tag", tag);
         model.addAttribute("tagDTOs", TagCache.get());
+        model.addAttribute("permission", permission);
         if (StringUtils.isBlank(title)) {
             model.addAttribute("error", "标题不能为空！");
             return "publish";
@@ -85,6 +89,13 @@ public class PublishController {
         UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
         if (user == null) {
             model.addAttribute("error", "用户未登录");
+            return "publish";
+        }
+        //审核
+        ResultDTO resultDTO = baiduCloudProvider.getTextCensorResult(questionService.getTextDescriptionFromHtml(description));
+        if (resultDTO.getCode() != 1) {
+            model.addAttribute("error", resultDTO.getMessage());
+            model.addAttribute("description", description);
             return "publish";
         }
         Question question = new Question();

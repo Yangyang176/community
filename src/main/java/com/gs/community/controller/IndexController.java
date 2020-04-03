@@ -27,18 +27,20 @@ public class IndexController {
                         Model model,
                         @RequestParam(name = "page", defaultValue = "1") Integer page,
                         @RequestParam(name = "size", defaultValue = "15") Integer size,
+                        @RequestParam(name = "column", required = false) Integer column2,
                         @RequestParam(name = "search", required = false) String search,
                         @RequestParam(name = "tag", required = false) String tag,
                         @RequestParam(name = "sort", required = false) String sort) {
         UserAccount userAccount = (UserAccount) request.getSession().getAttribute("userAccount");
-        List<QuestionDTO> topQuestions = questionService.listTop(search, tag, sort);
-        PaginationDTO pagination = questionService.list(page, size, search, tag, sort,userAccount);
+        List<QuestionDTO> topQuestions = questionService.listTopwithColumn(search, tag, sort, column2);
+        PaginationDTO pagination = questionService.listwithColumn(page, size, search, tag, sort, column2, userAccount);
         List<String> hotTags = hotTagCache.getHots();
         model.addAttribute("pagination", pagination);
         model.addAttribute("search", search);
         model.addAttribute("hotTags", hotTags);
         model.addAttribute("tag", tag);
         model.addAttribute("sort", sort);
+        model.addAttribute("culumn", column2);
         model.addAttribute("topQuestions", topQuestions);
         return "index";
     }

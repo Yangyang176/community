@@ -45,7 +45,7 @@ public class BaiduProvider {
         try {
             Response response = client.newCall(request).execute();
             String string = response.body().string();
-            System.out.println(string);
+//            System.out.println(string);
             BaiduUserDTO baiduUserDTO = JSON.parseObject(string, BaiduUserDTO.class);
             return baiduUserDTO;
         } catch (IOException e) {

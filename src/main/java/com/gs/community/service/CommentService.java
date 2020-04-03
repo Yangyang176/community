@@ -107,10 +107,11 @@ public class CommentService {
             }
 
             commentMapper.insert(comment);
+            //增加评论数
             parentComment.setCommentCount(1);
             commentExtMapper.incComment(parentComment);
             //创建通知
-            createNotify(comment, parentComment.getCommentator(), commentator.getName(), parentQuestion.getTitle(), NotificationTypeEnum.REPLY_COMMENT, parentQuestion.getId());
+            createNotify(comment, parentComment.getCommentator(), commentator.getName(), parentComment.getContent(), NotificationTypeEnum.REPLY_COMMENT, parentQuestion.getId());
         } else {
             //回复问题
             Question parentQuestion = questionMapper.selectByPrimaryKey(comment.getParentId());
@@ -234,6 +235,7 @@ public class CommentService {
 
     public int delCommentByIdAndType(Integer userId, Integer groupId, Integer id, Integer type) {
         int c = 0;
+        Comment comment = commentMapper.selectByPrimaryKey(id);
         if (groupId >= 18) {
             c = commentMapper.deleteByPrimaryKey(id);
         } else {
@@ -246,6 +248,14 @@ public class CommentService {
             commentExample.createCriteria().andTypeEqualTo(2).andParentIdEqualTo(id);
             c += commentMapper.deleteByExample(commentExample);
         }
+        UserAccount userAccount = new UserAccount();
+        userAccount.setUserId(comment.getCommentator());
+        userAccount.setScore1(score1CommentInc);
+        userAccount.setScore2(score2CommentInc);
+        userAccount.setScore3(score3CommentInc);
+        userAccount.setScore(score1CommentInc*score1Priorities+score2CommentInc*score2Priorities+score3CommentInc*score3Priorities);
+        userAccountExtMapper.decScore(userAccount);
+        userAccount=null;
         return c;
     }
 }

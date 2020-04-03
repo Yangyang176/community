@@ -2,18 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title th:text="${'账号设置'+@environment.getProperty('site.main.titleInfo')}"></title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="/layui/css/layui.css">
-    <link rel="stylesheet" href="/css/global.css">
-    <link rel="stylesheet" href="/css/mylay.css">
-    <link rel="stylesheet" href="/css/community.css">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-    <script src="/js/jquery-3.3.1.min.js"></script>
-    <script src="/js/bootstrap.min.js" type="application/javascript"></script>
-    <script src="/js/sweetalert.min.js" type="application/javascript"></script>
-    <script src="/layui/layui.js" type="application/javascript"></script>
+    <th:block th:insert="~{navigation :: head}"></th:block>
 </head>
 <body>
 <div th:insert="~{navigation :: nav}"></div>
@@ -38,7 +27,7 @@
                 <li lay-id="score">积分</li>
                 <li lay-id="userGroup">用户组</li>
                 <li lay-id="avatar">头像</li>
-                <li lay-id="pass">密码</li>
+                <!--<li lay-id="pass">密码</li>-->
 
             </ul>
             <div class="layui-tab-content" style="padding: 20px 0;">

@@ -2,21 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>发布 - 山商论坛</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <th:block th:insert="~{navigation :: head}"></th:block>
     <link rel="stylesheet" href="/layui/css/layui.css">
-    <link rel="stylesheet" href="/css/global.css">
-    <link rel="stylesheet" href="/css/mylay.css">
     <link rel="stylesheet" href="/css/editormd.min.css">
-    <link rel="stylesheet" href="/css/community.css">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-    <script src="/js/jquery-3.3.1.min.js"></script>
-    <script src="/js/bootstrap.min.js" type="application/javascript"></script>
     <script src="/js/editormd.min.js" type="application/javascript"></script>
-    <script src="/js/sweetalert.min.js"></script>
-    <script src="/layui/layui.js" type="application/javascript"></script>
-    <script src="/js/community.js" type="application/javascript"></script>
 </head>
 <body>
 <div th:insert="~{navigation :: nav}"></div>
@@ -100,8 +89,8 @@
                                     <label class="layui-form-label">阅读权限</label>
                                     <div class="layui-input-inline" style="width: 190px;">
                                         <select lay-verify="required" id="permission" name="permission">
-                                            <option value="0" selected>默认，所有用户可见</option>
-                                            <option value="1">LV1及以上用户可见</option>
+                                            <option value="0" th:selected="${permission==null||permission==0}">默认，所有用户可见</option>
+                                            <option value="1" th:selected="${permission==1}">LV1及以上用户可见</option>
                                             <option value="2">LV2及以上用户可见</option>
                                             <option value="3">LV3及以上用户可见</option>
                                             <option value="4">LV4及以上用户可见</option>
