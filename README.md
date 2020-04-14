@@ -19,6 +19,7 @@
 - vim src/main/resources/application-production.properties
 - mvn package
 - java -jar -Dspring.profiles.active=production target/community-0.0.1-SNAPSHOT.jar
+- mvn clean compile flyway:migrate
 ## 资料
 - [mybatis依赖配置](https://mybatis.org/mybatis-3/configuration.html#settings)
 - [mybatis spring-boot 自动配置](http://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)
