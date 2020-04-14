@@ -15,7 +15,10 @@
 - yum install maven
 - mvn -v
 - mvn compile package
-
+- cp src/main/resources/application.properties src/main/resources/application-production.properties
+- vim src/main/resources/application-production.properties
+- mvn package
+- java -jar -Dspring.profiles.active=production target/community-0.0.1-SNAPSHOT.jar
 ## 资料
 - [mybatis依赖配置](https://mybatis.org/mybatis-3/configuration.html#settings)
 - [mybatis spring-boot 自动配置](http://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)

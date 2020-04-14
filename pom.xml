@@ -110,6 +110,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -128,9 +129,9 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>5.2.4</version>
                 <configuration>
-                    <url>jdbc:mysql://localhost/community?useSSL=false</url>
+                    <url>jdbc:mysql://rm-m5eu023l31n850m97co.mysql.rds.aliyuncs.com/community?useSSL=false</url>
                     <user>root</user>
-                    <password>mysql123</password>
+                    <password>Mysql123</password>
                 </configuration>
                 <dependencies>
                     <dependency>
