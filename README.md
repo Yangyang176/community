@@ -20,6 +20,7 @@
 - mvn package
 - java -jar -Dspring.profiles.active=production target/community-0.0.1-SNAPSHOT.jar
 - mvn clean compile flyway:migrate
+- vim /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.242.b08-0.el7_7.x86_64/jre/lib/security/java.security
 ## 资料
 - [mybatis依赖配置](https://mybatis.org/mybatis-3/configuration.html#settings)
 - [mybatis spring-boot 自动配置](http://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/)

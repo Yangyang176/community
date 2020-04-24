@@ -1,8 +1,6 @@
 package com.gs.community.controller;
 
-import com.gs.community.dto.CommentCreateDTO;
-import com.gs.community.dto.CommentDTO;
-import com.gs.community.dto.ResultDTO;
+import com.gs.community.dto.*;
 import com.gs.community.enums.CommentTypeEnum;
 import com.gs.community.exception.CustomizeErrorCode;
 import com.gs.community.exception.CustomizeException;
@@ -63,6 +61,12 @@ public class CommentController {
     public ResultDTO<List<CommentDTO>> comments(@PathVariable(name = "id") Integer id) {
         List<CommentDTO> commentDTOS = commentService.listByTargetId(id, CommentTypeEnum.COMMENT);
         return ResultDTO.okOf(commentDTOS);
+    }
+    @ResponseBody
+    @RequestMapping(value = "/api/comment/list", method = RequestMethod.POST)
+    public ResultDTO<List<CommentDTO>> commentList(@RequestBody CommentQueryDTO commentQueryDTO) {
+        PaginationDTO paginationDTO = commentService.listByCommentQueryDTO(commentQueryDTO);
+        return ResultDTO.okOf(paginationDTO);
     }
 
     @PostMapping("/comment/del/id")
